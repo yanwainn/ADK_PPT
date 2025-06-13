@@ -5,7 +5,7 @@ Supports both Azure OpenAI and direct OpenAI APIs.
 import asyncio
 import streamlit as st
 from modules.agents import extract_key_sections, create_visual_prompt, extract_key_bullet_points
-from modules.helpers import extract_text_from_pdf, generate_image_from_prompt, save_image_locally, load_image_info_from_pil
+from modules.helpers import extract_text_from_file, generate_image_from_prompt, save_image_locally, load_image_info_from_pil
 from modules.slide_generator import create_html_slide
 
 async def process_pdf_to_presentation(uploaded_file):
@@ -16,20 +16,20 @@ async def process_pdf_to_presentation(uploaded_file):
         uploaded_file: Streamlit uploaded file object
     """
     try:
-        # Step 1: Extract text from PDF
-        st.write("📄 Extracting text from PDF...")
-        pdf_text = extract_text_from_pdf(uploaded_file)
+        # Step 1: Extract text from file
+        st.write("📄 Extracting text from file...")
+        file_text = extract_text_from_file(uploaded_file)
         
-        if not pdf_text:
-            st.error("Failed to extract text from PDF")
+        if not file_text:
+            st.error("Failed to extract text from file")
             return
         
-        st.session_state.pdf_content = pdf_text
-        st.success(f"✅ Extracted {len(pdf_text)} characters from PDF")
+        st.session_state.pdf_content = file_text
+        st.success(f"✅ Extracted {len(file_text)} characters from file")
         
         # Step 2: Extract key sections using AI
         st.write("🤖 Analyzing content and extracting key sections...")
-        extraction_result = await extract_key_sections(pdf_text)
+        extraction_result = await extract_key_sections(file_text)
         st.session_state.key_sections = extraction_result
         
         st.success(f"✅ Identified {len(extraction_result.key_sections)} key sections")

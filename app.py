@@ -156,8 +156,8 @@ def render_main_content():
     st.info(f"{provider_emoji} Using {provider.upper()} OpenAI API")
     
     # File upload
-    st.subheader("Upload Your PDF Document")
-    uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
+    st.subheader("Upload Your Document (PDF, TXT, or Markdown)")
+    uploaded_file = st.file_uploader("Choose a file", type=["pdf", "txt", "md"])
     
     if uploaded_file is not None:
         st.write(f"Uploaded: {uploaded_file.name}")

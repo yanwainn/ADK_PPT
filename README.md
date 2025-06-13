@@ -8,7 +8,7 @@ An intelligent application that transforms PDF documents into professional HTML 
 
 ## ✨ Features
 
-- **🔍 PDF Content Extraction**: Automatically extracts key sections from PDF documents
+- **🔍 Document Content Extraction**: Automatically extracts key sections from PDF, TXT, and Markdown documents
 - **🤖 AI-Powered Analysis**: Uses GPT to identify the most important content for presentation slides
 - **🎨 Image Generation**: Creates relevant images for each slide using DALL-E 3
 - **🔄 Flexible API Support**: Works with both Azure OpenAI and direct OpenAI APIs
@@ -144,6 +144,7 @@ make status        # Show project status
    - Enter your API credentials
 
 4. **Upload a PDF document** through the web interface
+   - You can now upload PDF, TXT, or Markdown (.md) files
 
 5. **Generate presentation** by clicking the "Generate Presentation" button
 

@@ -42,6 +42,53 @@ def extract_text_from_pdf(pdf_file):
         st.error(f"Error extracting text from PDF: {str(e)}")
         return None
 
+def extract_text_from_txt(txt_file):
+    """
+    Extract text content from a TXT file.
+    Args:
+        txt_file: The uploaded TXT file
+    Returns:
+        str: Extracted text or None if extraction failed
+    """
+    try:
+        return txt_file.read().decode("utf-8")
+    except Exception as e:
+        st.error(f"Error extracting text from TXT: {str(e)}")
+        return None
+
+def extract_text_from_md(md_file):
+    """
+    Extract text content from a Markdown file.
+    Args:
+        md_file: The uploaded Markdown file
+    Returns:
+        str: Extracted text or None if extraction failed
+    """
+    try:
+        return md_file.read().decode("utf-8")
+    except Exception as e:
+        st.error(f"Error extracting text from Markdown: {str(e)}")
+        return None
+
+def extract_text_from_file(uploaded_file):
+    """
+    Dispatch to the correct extraction function based on file extension.
+    Args:
+        uploaded_file: The uploaded file object
+    Returns:
+        str: Extracted text or None if extraction failed
+    """
+    name = uploaded_file.name.lower()
+    if name.endswith('.pdf'):
+        return extract_text_from_pdf(uploaded_file)
+    elif name.endswith('.txt'):
+        return extract_text_from_txt(uploaded_file)
+    elif name.endswith('.md'):
+        return extract_text_from_md(uploaded_file)
+    else:
+        st.error("Unsupported file type. Please upload a PDF, TXT, or Markdown file.")
+        return None
+
 async def generate_image_from_prompt(prompt, size="1024x1024"):
     """
     Generate image using DALL-E (supports both Azure and direct OpenAI).
