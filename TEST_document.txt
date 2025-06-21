@@ -1,0 +1,19 @@
+Sure, William! Here's a concise and clear **1-page context** about **AI and Emotion**, perfect for presentations, pitch decks, or study summaries:
+
+---
+
+## 🧠 AI and Emotion: Understanding the Connection
+
+### What is Emotional AI?
+
+**Emotional AI**, or **Affective Computing**, refers to systems that can **recognize, interpret, simulate, and sometimes respond** to human emotions. It combines **machine learning**, **natural language processing (NLP)**, and **computer vision** to detect emotional cues from **facial expressions, voice tone, body language, or text**.
+
+---
+
+### Why Does Emotion Matter in AI?
+
+Humans aren’t just logical—we’re emotional. Emotions influence decisions, behaviors, and communication. For AI to truly understand or interact naturally with people, especially in **healthcare, education, customer service, and companion robots**, it needs emotional awareness.
+
+> “An emotionally intelligent AI doesn’t just *respond* — it *resonates*.”
+
+---
