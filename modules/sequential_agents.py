@@ -62,7 +62,7 @@ class GeminiContentGenerator:
     """
     
     def __init__(self):
-        self.model_name = "gemini-2.0-flash-exp"
+        self.model_name = "gemini-2.5-flash"
         self.model = None
         if GEMINI_AVAILABLE:
             try:

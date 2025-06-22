@@ -42,8 +42,8 @@ class HTMLPresentationGenerator:
         
         if GEMINI_AVAILABLE:
             try:
-                self.gemini_model = genai.GenerativeModel('gemini-2.0-flash-exp')
-                logger.info("🤖 Gemini 2.0 Flash model initialized")
+                self.gemini_model = genai.GenerativeModel('gemini-2.5-flash')
+                logger.info("🤖 Gemini 2.5 Flash model initialized")
             except Exception as e:
                 logger.warning(f"⚠️ Failed to initialize Gemini: {e}")
                 self.gemini_model = None

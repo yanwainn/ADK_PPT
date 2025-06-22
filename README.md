@@ -1,11 +1,11 @@
 # 🎉 Enhanced AI Presentation System
 
-An advanced AI-powered presentation generation system using **Gemini 2.0 Flash** for intelligent content creation and professional HTML presentations.
+An advanced AI-powered presentation generation system using **Gemini 2.5 Flash** for intelligent content creation and professional HTML presentations.
 
 ## ✨ Features
 
 ### 🤖 AI-Powered Content Generation
-- **Gemini 2.0 Flash LLM** integration for real content creation
+- **Gemini 2.5 Flash LLM** integration for real content creation
 - **Sequential 5-agent workflow** for intelligent processing
 - **Context-aware insights** and professional bullet points
 - **Theme-based design optimization** with AI-generated color palettes
@@ -26,7 +26,7 @@ An advanced AI-powered presentation generation system using **Gemini 2.0 Flash**
 
 ### Prerequisites
 - Python 3.11+
-- Google API key for Gemini 2.0 Flash
+- Google API key for Gemini 2.5 Flash
 - Virtual environment (recommended)
 
 ### Installation
@@ -107,7 +107,7 @@ print(f"Generated {len(result['slides'])} slides")
 ## 🔧 Technical Details
 
 ### AI Models
-- **Primary:** Gemini 2.0 Flash Experimental (`gemini-2.0-flash-exp`)
+- **Primary:** Gemini 2.5 Flash (`gemini-2.5-flash`)
 - **Fallback:** Intelligent template-based generation
 - **Content Quality:** Real AI insights, not placeholders
 
@@ -167,4 +167,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-**🚀 Ready for production use with Gemini 2.0 Flash!** 
+**🚀 Ready for production use with Gemini 2.5 Flash!** 

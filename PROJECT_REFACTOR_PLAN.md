@@ -306,7 +306,7 @@ import google.generativeai as genai
 api_key = os.getenv('GOOGLE_API_KEY') or os.getenv('GEMINI_API_KEY')
 if api_key:
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-2.0-flash-exp')
+    model = genai.GenerativeModel('gemini-2.5-flash')
     response = model.generate_content('Hello, test message')
     print('✅ Gemini API working:', response.text[:50])
 else:

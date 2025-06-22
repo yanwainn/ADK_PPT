@@ -51,11 +51,11 @@ except ImportError:
 class RateLimitManager:
     """Manages API rate limiting to avoid quota exceeded errors"""
     
-    def __init__(self, max_requests_per_minute=8):  # Set to 8 to stay under 10/min limit
+    def __init__(self, max_requests_per_minute=15):  # Increased to 15 for better content generation
         self.max_requests = max_requests_per_minute
         self.request_times = deque()
         self.last_request_time = 0
-        self.min_interval = 60.0 / max_requests_per_minute  # Minimum seconds between requests
+        self.min_interval = 4.0  # Fixed 4 second interval between requests
     
     def can_make_request(self) -> bool:
         """Check if we can make a request without hitting rate limits"""
@@ -96,7 +96,7 @@ class GeminiHTMLGenerator:
     """
     
     def __init__(self):
-        self.model_name = "gemini-2.0-flash-exp"
+        self.model_name = "gemini-2.5-flash"
         self.model = None
         self.rate_limiter = RateLimitManager()
         self.fallback_mode = False
@@ -822,7 +822,7 @@ def get_system_status() -> str:
 # Create the root agent using ADK's standard Agent class
 root_agent = Agent(
     name="simple_ppt_agent",
-    model="gemini-2.0-flash-exp",
+                    model="gemini-2.5-flash",
     description="AI-Enhanced PowerPoint generation agent using Gemini LLM for intelligent content creation.",
     instruction="""You are an advanced PowerPoint generation agent powered by Gemini LLM that creates professional presentations from text content.
 
