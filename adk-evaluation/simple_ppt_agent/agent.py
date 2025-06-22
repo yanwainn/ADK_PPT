@@ -191,20 +191,37 @@ Return ONLY a JSON object with this exact structure:
             
             else:  # content slide
                 prompt = f"""
-Create detailed content for a presentation slide.
+Create professional, Canva-style content for a presentation slide with concise, impactful bullet points.
 
 Slide Title: {slide_title}
 Context: {context[:800]}...
 
-Generate specific, informative content with:
-1. 4-6 detailed bullet points that are directly relevant to the slide title and context
-2. A key insight or main message for this specific slide topic
-3. Make content actionable and valuable, not generic
+Generate modern, professional content following these guidelines:
+
+📋 BULLET POINT STYLE (Canva-inspired):
+• Keep each bullet point 3-7 words maximum
+• Use action-oriented, powerful language
+• Start with strong verbs or key concepts
+• Make each point visually scannable
+• Focus on benefits and outcomes
+• Use parallel structure across points
+
+💡 CONTENT REQUIREMENTS:
+1. 4-5 concise, punchy bullet points
+2. Each point should be self-contained and clear
+3. Use modern business language
+4. Emphasize value propositions
+5. Make content memorable and quotable
+
+🎯 KEY MESSAGE:
+• One compelling insight (8-12 words)
+• Should capture the core value
+• Use confident, authoritative tone
 
 Return ONLY a JSON object with this exact structure:
 {{
-  "bullet_points": ["point 1", "point 2", "point 3", "point 4"],
-  "key_message": "your key insight here"
+  "bullet_points": ["• Powerful action phrase", "• Clear benefit statement", "• Compelling outcome", "• Strategic advantage"],
+  "key_message": "Core insight that drives results"
 }}
 """
             
@@ -296,11 +313,18 @@ Return ONLY a JSON object with this exact structure:
                     }
             
             else:  # content slide
-                points = re.findall(r'["\']([^"\']{15,})["\']', text)
+                points = re.findall(r'["\']([^"\']{10,})["\']', text)
                 if points:
+                    # Ensure bullet points start with bullet symbol
+                    formatted_points = []
+                    for point in points[:5]:
+                        if not point.startswith('•'):
+                            formatted_points.append(f"• {point}")
+                        else:
+                            formatted_points.append(point)
                     return {
-                        "bullet_points": points[:5],
-                        "key_message": points[0] if points else "Key insight from analysis"
+                        "bullet_points": formatted_points,
+                        "key_message": points[-1] if len(points) > 1 else "Transform insights into strategic advantage"
                     }
         
         except Exception as e:
@@ -343,14 +367,14 @@ Return ONLY a JSON object with this exact structure:
         else:
             return {
                 "bullet_points": [
-                    f"Detailed analysis of {slide_title.lower()}",
-                    "Supporting evidence and relevant data points",
-                    "Strategic implications and considerations", 
-                    "Recommended actions and next steps",
-                    "Key metrics and success indicators"
+                    f"• {slide_title.replace(' ', ' ').title()} Analysis",
+                    "• Data-Driven Insights",
+                    "• Strategic Recommendations", 
+                    "• Actionable Next Steps",
+                    "• Measurable Outcomes"
                 ],
-                "key_message": f"Critical insights and strategic recommendations for {slide_title.lower()}",
-                "supporting_details": "Additional context and supporting information available"
+                "key_message": f"Transform insights into strategic advantage",
+                "supporting_details": "Professional analysis with clear action items"
             }
 
     def generate_color_palette(self, themes: list) -> Dict[str, str]:
