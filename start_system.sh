@@ -17,7 +17,7 @@ echo "✅ Static server started (PID: $STATIC_PID) on http://localhost:8002"
 
 # Start ADK server
 echo "🤖 Starting ADK server..."
-source adk-venv/bin/activate
+source agentic-venv/bin/activate
 adk web --port 8001 &
 ADK_PID=$!
 echo "✅ ADK server started (PID: $ADK_PID) on http://localhost:8001"

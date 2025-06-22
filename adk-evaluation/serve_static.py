@@ -1,48 +1,58 @@
 #!/usr/bin/env python3
 """
-Simple static file server for serving presentations
+Static file server for serving generated presentations.
 """
 
 import http.server
 import socketserver
 import os
-import threading
+import sys
 from pathlib import Path
 
-def start_static_server(port=8002, directory="static"):
-    """Start a simple HTTP server to serve static files"""
+def serve_static_files():
+    """Start a static file server for presentations."""
     
-    class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, directory=directory, **kwargs)
-        
-        def end_headers(self):
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-            self.send_header('Access-Control-Allow-Headers', 'Content-Type')
-            super().end_headers()
+    # Set up directories
+    base_dir = Path(__file__).parent
+    static_dir = base_dir / "static"
+    presentations_dir = static_dir / "presentations"
+    
+    # Create directories if they don't exist
+    static_dir.mkdir(exist_ok=True)
+    presentations_dir.mkdir(exist_ok=True)
+    
+    # Change to static directory to serve files
+    os.chdir(static_dir)
+    
+    # Set up the server
+    PORT = 8002
+    Handler = http.server.SimpleHTTPRequestHandler
     
     try:
-        with socketserver.TCPServer(("", port), CustomHTTPRequestHandler) as httpd:
-            print(f"🌐 Static file server running on http://localhost:{port}")
-            print(f"📁 Serving files from: {os.path.abspath(directory)}")
+        with socketserver.TCPServer(("", PORT), Handler) as httpd:
+            print(f"🚀 Presentation server running on http://localhost:{PORT}")
+            print(f"📂 Serving static files from: {static_dir}")
+            print(f"📊 Presentations available at: http://localhost:{PORT}/presentations/")
+            print(f"📁 Files in presentations directory:")
+            
+            # List available presentations
+            for file in presentations_dir.glob("*.html"):
+                print(f"   📄 http://localhost:{PORT}/presentations/{file.name}")
+            
+            print(f"\n🔄 Server ready - waiting for requests...")
             httpd.serve_forever()
+            
+    except KeyboardInterrupt:
+        print("\n🛑 Static server stopped")
     except OSError as e:
-        if e.errno == 48:  # Address already in use
-            print(f"⚠️  Port {port} is already in use")
+        if "Address already in use" in str(e):
+            print(f"❌ Port {PORT} is already in use. Please stop the existing server first.")
         else:
-            print(f"❌ Error starting server: {e}")
+            print(f"❌ Server error: {e}")
+        sys.exit(1)
+    except Exception as e:
+        print(f"❌ Unexpected error: {e}")
+        sys.exit(1)
 
 if __name__ == "__main__":
-    # Ensure static directory exists
-    os.makedirs("static/presentations", exist_ok=True)
-    
-    # Start the server in a separate thread
-    server_thread = threading.Thread(target=start_static_server, daemon=True)
-    server_thread.start()
-    
-    print("Static file server started. Press Ctrl+C to stop.")
-    try:
-        server_thread.join()
-    except KeyboardInterrupt:
-        print("\n🛑 Stopping static file server...") 
+    serve_static_files() 

@@ -8,6 +8,8 @@ import json
 import traceback
 from typing import Dict, Any
 from datetime import datetime
+import time
+from collections import deque
 
 # Add parent directory to path to access modules
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
@@ -46,28 +48,83 @@ except ImportError:
     print("⚠️ Gemini API not available")
 
 
+class RateLimitManager:
+    """Manages API rate limiting to avoid quota exceeded errors"""
+    
+    def __init__(self, max_requests_per_minute=8):  # Set to 8 to stay under 10/min limit
+        self.max_requests = max_requests_per_minute
+        self.request_times = deque()
+        self.last_request_time = 0
+        self.min_interval = 60.0 / max_requests_per_minute  # Minimum seconds between requests
+    
+    def can_make_request(self) -> bool:
+        """Check if we can make a request without hitting rate limits"""
+        now = time.time()
+        
+        # Remove requests older than 1 minute
+        while self.request_times and now - self.request_times[0] > 60:
+            self.request_times.popleft()
+        
+        # Check if we're under the rate limit
+        if len(self.request_times) >= self.max_requests:
+            return False
+        
+        # Check minimum interval between requests
+        if now - self.last_request_time < self.min_interval:
+            return False
+        
+        return True
+    
+    def record_request(self):
+        """Record that a request was made"""
+        now = time.time()
+        self.request_times.append(now)
+        self.last_request_time = now
+    
+    def wait_if_needed(self):
+        """Wait if necessary to avoid rate limits"""
+        if not self.can_make_request():
+            wait_time = self.min_interval - (time.time() - self.last_request_time)
+            if wait_time > 0:
+                print(f"⏱️ Rate limit protection: waiting {wait_time:.1f}s...")
+                time.sleep(wait_time)
+
+
 class GeminiHTMLGenerator:
     """
-    Gemini-powered HTML presentation generator
+    Gemini-powered HTML presentation generator with rate limiting
     """
     
     def __init__(self):
         self.model_name = "gemini-2.0-flash-exp"
         self.model = None
+        self.rate_limiter = RateLimitManager()
+        self.fallback_mode = False
+        
         if GEMINI_AVAILABLE:
             try:
                 self.model = genai.GenerativeModel(self.model_name)
-                print(f"🤖 Gemini HTML generator initialized")
+                print(f"🤖 Gemini HTML generator initialized with rate limiting")
             except Exception as e:
                 print(f"❌ Failed to initialize Gemini: {e}")
                 self.model = None
+                self.fallback_mode = True
     
     def generate_slide_content(self, slide_data: Dict[str, Any], context: str) -> Dict[str, Any]:
-        """Generate actual content for a slide using Gemini"""
-        if not self.model:
+        """Generate actual content for a slide using Gemini with rate limiting"""
+        if not self.model or self.fallback_mode:
+            print("📝 Using fallback content generation")
+            return self._fallback_slide_content(slide_data)
+        
+        # Check rate limits
+        if not self.rate_limiter.can_make_request():
+            print("⚠️ Rate limit reached, using fallback content")
             return self._fallback_slide_content(slide_data)
         
         try:
+            # Wait if needed to respect rate limits
+            self.rate_limiter.wait_if_needed()
+            
             slide_type = slide_data.get("type", "content")
             slide_title = slide_data.get("title", "")
             
@@ -117,6 +174,8 @@ Make the content professional, actionable, and valuable to the audience.
 Format as JSON with keys: bullet_points, key_message, supporting_details
 """
             
+            # Record the request and make the API call
+            self.rate_limiter.record_request()
             response = self.model.generate_content(prompt)
             
             # Clean the response text and try to parse JSON
@@ -132,13 +191,19 @@ Format as JSON with keys: bullet_points, key_message, supporting_details
             # Try to parse JSON response
             try:
                 content_data = json.loads(response_text)
+                print(f"✅ Generated content for {slide_type} slide")
                 return content_data
             except json.JSONDecodeError:
                 # If JSON parsing fails, extract content manually
                 return self._parse_text_response(response.text, slide_type)
                 
         except Exception as e:
-            print(f"⚠️ Gemini content generation failed: {e}")
+            error_str = str(e)
+            if "429" in error_str or "RESOURCE_EXHAUSTED" in error_str:
+                print(f"⚠️ Rate limit exceeded, switching to fallback mode")
+                self.fallback_mode = True  # Switch to fallback mode for remaining requests
+            else:
+                print(f"⚠️ Gemini content generation failed: {e}")
             return self._fallback_slide_content(slide_data)
     
     def _parse_text_response(self, text: str, slide_type: str) -> Dict[str, Any]:
@@ -186,11 +251,20 @@ Format as JSON with keys: bullet_points, key_message, supporting_details
             }
 
     def generate_color_palette(self, themes: list) -> Dict[str, str]:
-        """Generate color palette based on themes"""
-        if not self.model:
+        """Generate color palette based on themes with rate limiting"""
+        if not self.model or self.fallback_mode:
+            print("🎨 Using default color palette")
+            return self._default_color_palette()
+        
+        # Check rate limits for color palette generation
+        if not self.rate_limiter.can_make_request():
+            print("⚠️ Rate limit reached, using default colors")
             return self._default_color_palette()
         
         try:
+            # Wait if needed to respect rate limits
+            self.rate_limiter.wait_if_needed()
+            
             prompt = f"""
 Based on these presentation themes: {', '.join(themes)}, suggest a professional color palette.
 
@@ -205,14 +279,23 @@ Consider the themes and suggest colors that convey professionalism and match the
 Return as JSON with keys: primary, secondary, background, text, accent
 """
             
+            # Record the request and make the API call
+            self.rate_limiter.record_request()
             response = self.model.generate_content(prompt)
             try:
-                return json.loads(response.text)
+                colors = json.loads(response.text)
+                print("✅ Generated custom color palette")
+                return colors
             except:
                 return self._default_color_palette()
                 
         except Exception as e:
-            print(f"⚠️ Color palette generation failed: {e}")
+            error_str = str(e)
+            if "429" in error_str or "RESOURCE_EXHAUSTED" in error_str:
+                print(f"⚠️ Rate limit exceeded for colors, using default palette")
+                self.fallback_mode = True
+            else:
+                print(f"⚠️ Color palette generation failed: {e}")
             return self._default_color_palette()
     
     def _default_color_palette(self) -> Dict[str, str]:
@@ -627,7 +710,8 @@ def create_presentation_from_text(document_text: str, presentation_title: str = 
             os.makedirs(static_dir, exist_ok=True)
             static_path = os.path.join(static_dir, html_filename)
             
-            # Generate enhanced HTML using Gemini LLM
+            # Generate enhanced HTML using Gemini LLM (with rate limiting)
+            print("🎨 Generating enhanced presentation with AI...")
             html_content = generate_enhanced_html(
                 result, 
                 presentation_title or result.get("metadata", {}).get("document_title", "AI-Generated Presentation"),
@@ -647,9 +731,13 @@ def create_presentation_from_text(document_text: str, presentation_title: str = 
             slides_info = result.get("slide_structure", result.get("slides", []))
             slide_titles = [slide.get("title", "Untitled") for slide in slides_info]
             
+            # Check if we used fallback mode due to rate limits
+            ai_mode = "AI-powered" if GEMINI_AVAILABLE and not html_generator.fallback_mode else "Template-based"
+            rate_limit_msg = " (Rate limits applied)" if html_generator.fallback_mode else ""
+            
             return json.dumps({
                 "status": "success",
-                "message": "✅ AI-Enhanced Presentation created successfully!",
+                "message": f"✅ {'AI-Enhanced' if not html_generator.fallback_mode else 'Professional'} Presentation created successfully!{rate_limit_msg}",
                 "presentation_path": html_path,
                 "download_url": download_url,
                 "direct_link": f"Click here to view: {download_url}",
@@ -658,18 +746,20 @@ def create_presentation_from_text(document_text: str, presentation_title: str = 
                 "slides": slide_titles,
                 "themes": result.get("metadata", {}).get("themes", []),
                 "ai_features": [
-                    "✨ Gemini LLM content generation",
-                    "🎨 AI-optimized color schemes", 
+                    f"✨ {ai_mode} content generation",
+                    "🎨 Professional color schemes", 
                     "📝 Intelligent slide structuring",
                     "💡 Auto-generated insights",
                     "📱 Mobile-responsive design"
                 ],
                 "enhancement_details": {
                     "gemini_available": GEMINI_AVAILABLE,
-                    "content_generation": "AI-powered" if GEMINI_AVAILABLE else "Template-based",
+                    "content_generation": ai_mode,
+                    "rate_limiting": "Active" if not html_generator.fallback_mode else "Fallback mode",
                     "design_optimization": "Theme-based color palettes",
                     "responsive_design": "Mobile and desktop optimized"
-                }
+                },
+                "note": "If you see 'Template-based' content, this is due to API rate limits. Wait a moment and try again for AI-enhanced content." if html_generator.fallback_mode else "Full AI enhancement applied!"
             }, indent=2)
         else:
             return json.dumps({
