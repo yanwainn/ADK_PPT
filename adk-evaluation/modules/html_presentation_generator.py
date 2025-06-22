@@ -124,6 +124,7 @@ class HTMLPresentationGenerator:
             try:
                 prompt = f"""
                 You are a senior presentation strategist analyzing content for C-suite executives.
+                IMPORTANT: All presentations MUST use the Bosch corporate template and branding.
                 
                 Analyze this content to create a high-impact presentation structure:
                 
@@ -135,6 +136,8 @@ class HTMLPresentationGenerator:
                 3. Key sections that build a logical narrative arc
                 4. Presentation style that matches the content type and audience
                 5. Visual elements needed for each section
+                
+                CRITICAL: Always use "bosch" as the color_scheme to ensure Bosch corporate branding is applied.
                 
                 Analyze the content and determine what visual elements would best represent the data:
                 - If discussing numbers, metrics, or performance → suggest charts (bar/line/pie)
@@ -149,7 +152,7 @@ class HTMLPresentationGenerator:
                     "title": "string",
                     "sections": ["section1", "section2", ...],
                     "theme": "professional|creative|technical|business",
-                    "color_scheme": "blue|green|purple|orange|red",
+                    "color_scheme": "bosch",
                     "visual_suggestions": {{
                         "slide_2": "chart_type|process|comparison|kpi",
                         "slide_3": "chart_type|process|comparison|kpi",
@@ -175,6 +178,7 @@ class HTMLPresentationGenerator:
                 try:
                     analysis = json.loads(response_text)
                     logger.info(f"🤖 Gemini analysis: {analysis['slide_count']} slides recommended")
+                    logger.info(f"🎨 Color scheme from Gemini: {analysis.get('color_scheme', 'NOT PROVIDED')}")
                     return analysis
                 except json.JSONDecodeError:
                     logger.warning("⚠️ Failed to parse Gemini analysis JSON, trying manual parsing...")
@@ -212,7 +216,7 @@ class HTMLPresentationGenerator:
             "title": title,
             "sections": sections[:slide_count-2],  # Leave room for intro and conclusion
             "theme": "professional",
-            "color_scheme": "blue"
+            "color_scheme": "bosch"
         }
     
     def _generate_slide_content(self, content: str, analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -592,7 +596,7 @@ class HTMLPresentationGenerator:
             theme = theme_match.group(1) if theme_match else "professional"
             
             color_match = re.search(r'"color_scheme":\s*"([^"]+)"', text)
-            color_scheme = color_match.group(1) if color_match else "blue"
+            color_scheme = color_match.group(1) if color_match else "bosch"
             
             if slide_count or title or filtered_sections:
                 return {
@@ -614,28 +618,23 @@ class HTMLPresentationGenerator:
         theme_name = analysis.get("theme", "professional")
         title = analysis.get("title", "Presentation")
         
-        # Use theme system if available
-        if PresentationThemes:
-            # Get full content for theme selection
-            full_content = " ".join([str(slide) for slide in slides])
-            theme_config = select_theme(full_content, theme_name)
-            color_palette = theme_config["colors"]
-            fonts = theme_config["fonts"]
-        else:
-            # Fallback color schemes
-            colors = {
-                "blue": {"primary": "#1a365d", "secondary": "#2d3748", "accent": "#3182ce", "bg": "#f8fafc", "success": "#48bb78"},
-                "green": {"primary": "#0f4c3a", "secondary": "#1a5e4a", "accent": "#48bb78", "bg": "#f0fdf4", "success": "#68d391"},
-                "purple": {"primary": "#44337a", "secondary": "#553c9a", "accent": "#805ad5", "bg": "#faf5ff", "success": "#9f7aea"},
-                "orange": {"primary": "#c05621", "secondary": "#dd6b20", "accent": "#ed8936", "bg": "#fffaf0", "success": "#f6ad55"},
-                "red": {"primary": "#822727", "secondary": "#9b2c2c", "accent": "#e53e3e", "bg": "#fff5f5", "success": "#fc8181"}
-            }
-            color_scheme = analysis.get("color_scheme", "blue")
-            color_palette = colors.get(color_scheme, colors["blue"])
-            fonts = {
-                "primary": "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-                "display": "'Playfair Display', Georgia, serif"
-            }
+        logger.error("🚨🚨🚨 ENTERING _create_html_presentation - BOSCH THEME ENFORCEMENT 🚨🚨🚨")
+        
+        # FORCE BOSCH THEME FOR ALL PRESENTATIONS
+        # Direct hardcoding to ensure Bosch colors are always used
+        color_palette = {
+            "primary": "#8B1538",      # Bosch Red/Magenta
+            "secondary": "#00A9CE",    # Bosch Teal
+            "accent": "#7FB539",       # Bosch Green
+            "success": "#7FB539",      # Bosch Green
+            "bg": "#FFFFFF"            # White
+        }
+        fonts = {
+            "primary": "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+            "display": "'Inter', -apple-system, sans-serif"
+        }
+        logger.info(f"🎯 FORCING BOSCH THEME")
+        logger.info(f"🎨 Bosch color palette: {color_palette}")
         
         html_content = f"""
 <!DOCTYPE html>
@@ -644,9 +643,27 @@ class HTMLPresentationGenerator:
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{title}</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;900&display=swap');
+        /* Embedded font declarations for offline use */
+        @font-face {{
+            font-family: 'Inter';
+            font-style: normal;
+            font-weight: 400;
+            src: local('Inter'), local('Inter-Regular');
+        }}
+        @font-face {{
+            font-family: 'Inter';
+            font-style: normal;
+            font-weight: 600;
+            font-weight: bold;
+            src: local('Inter Bold'), local('Inter-Bold');
+        }}
+        @font-face {{
+            font-family: 'Playfair Display';
+            font-style: normal;
+            font-weight: 700;
+            src: local('Playfair Display Bold'), local('PlayfairDisplay-Bold');
+        }}
         
         :root {{
             /* Professional Typography */
@@ -715,14 +732,15 @@ class HTMLPresentationGenerator:
             box-shadow: var(--shadow-xl);
         }}
         
-        .slide::before {{
+        /* Bosch-style color strip at bottom */
+        .slide::after {{
             content: '';
             position: absolute;
-            top: 0;
+            bottom: 0;
             left: 0;
             right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+            height: 5px;
+            background: linear-gradient(to right, #8B1538 33%, #00A9CE 33%, #00A9CE 66%, #7FB539 66%);
         }}
         
         
@@ -750,15 +768,11 @@ class HTMLPresentationGenerator:
         }}
         
         .logo-placeholder {{
-            width: 50px;
-            height: 50px;
-            background: var(--color-primary);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.5rem;
+            font-weight: bold;
+            color: #8B1538;
+            font-size: 1.4rem;
+            letter-spacing: 0.1em;
+            font-family: var(--font-primary);
         }}
         
         .section-label {{
@@ -800,9 +814,9 @@ class HTMLPresentationGenerator:
             display: flex;
             flex-direction: column;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             padding: var(--space-xl) var(--space-xxl);
-            text-align: center;
+            text-align: left;
         }}
         
         .title-wrapper {{
@@ -810,19 +824,19 @@ class HTMLPresentationGenerator:
         }}
         
         .title-slide h1 {{
-            font-family: var(--font-display);
+            font-family: var(--font-primary);
             font-size: clamp(2.5rem, 4vw, 3.5rem);
-            font-weight: 700;
+            font-weight: 500;
             margin-bottom: var(--space-md);
             letter-spacing: -0.02em;
             line-height: 1.2;
-            color: var(--color-primary);
+            color: #333333;
         }}
         
         .title-slide .subtitle {{
             font-size: 1.25rem;
             font-weight: 400;
-            color: var(--color-secondary);
+            color: #8B1538;
             max-width: 800px;
             line-height: 1.6;
         }}
@@ -1518,10 +1532,10 @@ class HTMLPresentationGenerator:
     </div>
     
     <div class="navigation">
-        <button class="nav-btn" onclick="scrollToSlide(1)"><i class="fas fa-home"></i> Start</button>
-        <button class="nav-btn" onclick="scrollToPrev()"><i class="fas fa-chevron-left"></i> Previous</button>
-        <button class="nav-btn" onclick="scrollToNext()"><i class="fas fa-chevron-right"></i> Next</button>
-        <button class="nav-btn" onclick="scrollToSlide({len(slides)})"><i class="fas fa-flag-checkered"></i> End</button>
+        <button class="nav-btn" onclick="scrollToSlide(1)">🏠 Start</button>
+        <button class="nav-btn" onclick="scrollToPrev()">◀ Previous</button>
+        <button class="nav-btn" onclick="scrollToNext()">▶ Next</button>
+        <button class="nav-btn" onclick="scrollToSlide({len(slides)})">🏁 End</button>
     </div>
     
     <script>
@@ -1592,7 +1606,7 @@ class HTMLPresentationGenerator:
         <div class="slide title-slide" data-slide="{slide_num}">
             <div class="corporate-header">
                 <div class="logo-placeholder">
-                    <i class="fas fa-building"></i>
+                    BOSCH
                 </div>
                 <div class="date-info">{self._get_current_date()}</div>
             </div>
@@ -1635,7 +1649,7 @@ class HTMLPresentationGenerator:
             <div class="corporate-header">
                 <div class="section-label">EXECUTIVE SUMMARY</div>
                 <div class="logo-placeholder">
-                    <i class="fas fa-building"></i>
+                    BOSCH
                 </div>
             </div>
             
@@ -1648,7 +1662,7 @@ class HTMLPresentationGenerator:
                 
                 <div class="next-steps-box">
                     <div class="next-steps-header">
-                        <i class="fas fa-arrow-circle-right"></i>
+                        <span style="font-size: 1.5rem;">➤</span>
                         <span>IMMEDIATE NEXT STEPS</span>
                     </div>
                     <p>{slide.get('closing_statement', 'Transform insights into action for sustainable competitive advantage')}</p>
@@ -1681,7 +1695,7 @@ class HTMLPresentationGenerator:
         """Generate standard corporate content slide"""
         bullets_html = ''.join([f'''
             <li>
-                <i class="fas fa-angle-right"></i>
+                <span style="font-size: 1rem;">›</span>
                 <span>{bullet}</span>
             </li>''' for bullet in slide.get('bullets', [])])
         key_takeaway = slide.get('key_takeaway', '')
@@ -1691,7 +1705,7 @@ class HTMLPresentationGenerator:
             <div class="corporate-header">
                 <div class="section-label">{self._get_section_label(slide_num)}</div>
                 <div class="logo-placeholder">
-                    <i class="fas fa-building"></i>
+                    BOSCH
                 </div>
             </div>
             
@@ -1706,7 +1720,7 @@ class HTMLPresentationGenerator:
                     {f'''
                     <div class="insight-box">
                         <div class="insight-header">
-                            <i class="fas fa-lightbulb"></i>
+                            <span style="font-size: 1.5rem;">💡</span>
                             <span>KEY INSIGHT</span>
                         </div>
                         <p>{key_takeaway}</p>
@@ -1759,14 +1773,14 @@ class HTMLPresentationGenerator:
                     visual_html = VisualElementGenerator.generate_process_flow(visual_info.get("data"))
         
         # Create bullet points HTML
-        bullets_html = ''.join([f'<li><i class="fas fa-chart-line"></i> {bullet}</li>' for bullet in bullets])
+        bullets_html = ''.join([f'<li><span style="color: #3182ce; margin-right: 0.5rem;">📈</span> {bullet}</li>' for bullet in bullets])
         
         return f"""
         <div class="slide content-slide data-layout" data-slide="{slide_num}">
             <div class="corporate-header">
                 <div class="section-label">{self._get_section_label(slide_num)}</div>
                 <div class="logo-placeholder">
-                    <i class="fas fa-building"></i>
+                    BOSCH
                 </div>
             </div>
             
@@ -1824,14 +1838,14 @@ class HTMLPresentationGenerator:
                 <i class="fas {self._get_relevant_icon(title)}"></i>
             </div>'''
         
-        bullets_html = ''.join([f'<li><i class="fas fa-chevron-right"></i> {bullet}</li>' for bullet in bullets])
+        bullets_html = ''.join([f'<li><span style="color: #3182ce; margin-right: 0.5rem;">▸</span> {bullet}</li>' for bullet in bullets])
         
         return f"""
         <div class="slide content-slide visual-split-layout" data-slide="{slide_num}">
             <div class="corporate-header">
                 <div class="section-label">{self._get_section_label(slide_num)}</div>
                 <div class="logo-placeholder">
-                    <i class="fas fa-building"></i>
+                    BOSCH
                 </div>
             </div>
             
@@ -1902,20 +1916,20 @@ class HTMLPresentationGenerator:
     
     def _get_icon_for_highlight(self, index: int) -> str:
         """Get appropriate icon for value proposition"""
-        icons = ["fa-chart-line", "fa-shield-alt", "fa-rocket"]
+        icons = ["📊", "🛡️", "🚀"]
         return icons[index % len(icons)]
     
     def _get_icon_for_action(self, action: str) -> str:
         """Get icon based on action content"""
         action_lower = action.lower()
         if any(word in action_lower for word in ["implement", "deploy", "execute"]):
-            return "fa-play-circle"
+            return "▶"
         elif any(word in action_lower for word in ["analyze", "assess", "evaluate"]):
-            return "fa-analytics"
+            return "📊"
         elif any(word in action_lower for word in ["plan", "strategy", "design"]):
-            return "fa-project-diagram"
+            return "🎯"
         else:
-            return "fa-tasks"
+            return "✓"
     
     def _get_section_label(self, slide_num: int) -> str:
         """Get section label for slide"""
@@ -1926,15 +1940,15 @@ class HTMLPresentationGenerator:
         """Get relevant icon based on content"""
         title_lower = title.lower()
         if any(word in title_lower for word in ["customer", "client", "user"]):
-            return "fa-users"
+            return "👥"
         elif any(word in title_lower for word in ["growth", "increase", "revenue"]):
-            return "fa-chart-line"
+            return "📈"
         elif any(word in title_lower for word in ["technology", "digital", "innovation"]):
-            return "fa-microchip"
+            return "💻"
         elif any(word in title_lower for word in ["process", "efficiency", "operations"]):
-            return "fa-cogs"
+            return "⚙️"
         else:
-            return "fa-bullseye"
+            return "🎯"
     
     def _extract_number(self, text: str) -> str:
         """Extract number from text for metrics"""
@@ -1970,7 +1984,7 @@ class HTMLPresentationGenerator:
             <div class="corporate-header">
                 <div class="section-label">{self._get_section_label(slide_num)}</div>
                 <div class="logo-placeholder">
-                    <i class="fas fa-building"></i>
+                    BOSCH
                 </div>
             </div>
             
@@ -1983,7 +1997,7 @@ class HTMLPresentationGenerator:
                     <div class="comparison-insights">
                         <h3>Strategic Benefits</h3>
                         <ul class="benefit-list">
-                            {' '.join([f'<li><i class="fas fa-check-circle"></i> {bullet}</li>' for bullet in bullets])}
+                            {' '.join([f'<li><span style="color: #48bb78; margin-right: 0.5rem;">✓</span> {bullet}</li>' for bullet in bullets])}
                         </ul>
                     </div>
                 </div>
@@ -2015,7 +2029,7 @@ class HTMLPresentationGenerator:
             <div class="corporate-header">
                 <div class="section-label">{self._get_section_label(slide_num)}</div>
                 <div class="logo-placeholder">
-                    <i class="fas fa-building"></i>
+                    BOSCH
                 </div>
             </div>
             
@@ -2027,7 +2041,7 @@ class HTMLPresentationGenerator:
                     
                     <div class="process-details">
                         <div class="timeline-indicator">
-                            <i class="fas fa-clock"></i>
+                            <span style="font-size: 1.5rem;">🕐</span>
                             <span>Estimated Timeline: 12-16 weeks</span>
                         </div>
                         
@@ -2047,7 +2061,7 @@ class HTMLPresentationGenerator:
         """Generate a default chart when VisualElementGenerator is not available"""
         return '''
         <div class="default-visual">
-            <i class="fas fa-chart-bar" style="font-size: 4rem; color: #3182ce;"></i>
+            <span style="font-size: 4rem;">📊</span>
             <p style="margin-top: 1rem; color: #64748b;">Data Visualization</p>
         </div>'''
     
@@ -2075,7 +2089,7 @@ class HTMLPresentationGenerator:
             "title": analysis.get("title", "Presentation"),
             "slide_count": len(slides),
             "theme": analysis.get("theme", "professional"),
-            "color_scheme": analysis.get("color_scheme", "blue"),
+            "color_scheme": analysis.get("color_scheme", "bosch"),
             "estimated_duration": f"{len(slides) * 2}-{len(slides) * 3} minutes",
             "generation_timestamp": datetime.now().isoformat(),
             "generator": self.generator_name

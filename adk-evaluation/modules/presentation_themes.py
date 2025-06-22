@@ -49,6 +49,24 @@ class PresentationThemes:
             "suitable_for": ["technology", "software", "innovation", "digital", "ai", "data"]
         },
         
+        "bosch": {
+            "name": "Bosch Corporate",
+            "description": "Official Bosch corporate branding and colors",
+            "colors": {
+                "primary": "#8B1538",       # Bosch Red/Magenta
+                "secondary": "#00A9CE",     # Bosch Teal
+                "accent": "#7FB539",        # Bosch Green
+                "success": "#7FB539",       # Bosch Green
+                "warning": "#ff9800",       # Orange
+                "bg": "#FFFFFF"             # White
+            },
+            "fonts": {
+                "primary": "'Inter', -apple-system, sans-serif",
+                "display": "'Inter', -apple-system, sans-serif"
+            },
+            "suitable_for": ["bosch", "corporate", "enterprise", "industrial", "technology", "automotive"]
+        },
+        
         "sales": {
             "name": "Sales Energy",
             "description": "Energetic and persuasive for sales presentations",
@@ -194,4 +212,5 @@ class PresentationThemes:
 # Convenience function
 def select_theme(content: str, theme_hint: str = None) -> Dict[str, Any]:
     """Select appropriate theme based on content"""
-    return PresentationThemes.get_theme_by_content(content, theme_hint)
+    # FORCE BOSCH THEME FOR ALL PRESENTATIONS
+    return PresentationThemes.get_theme_by_name("bosch")

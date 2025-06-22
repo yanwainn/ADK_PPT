@@ -30,8 +30,8 @@ class VisualElementGenerator:
         svg = f'''<svg viewBox="0 0 {width} {height}" xmlns="http://www.w3.org/2000/svg">
             <defs>
                 <linearGradient id="barGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" style="stop-color:#3182ce;stop-opacity:1" />
-                    <stop offset="100%" style="stop-color:#1a365d;stop-opacity:1" />
+                    <stop offset="0%" style="stop-color:#8B1538;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#00A9CE;stop-opacity:1" />
                 </linearGradient>
             </defs>'''
         
@@ -44,7 +44,7 @@ class VisualElementGenerator:
             <rect x="{x}" y="{y}" width="{bar_width}" height="{bar_height}" 
                   fill="url(#barGradient)" rx="4" />
             <text x="{x + bar_width/2}" y="{y - 10}" text-anchor="middle" 
-                  font-size="14" font-weight="600" fill="#1a365d">{item['value']}</text>
+                  font-size="14" font-weight="600" fill="#8B1538">{item['value']}</text>
             <text x="{x + bar_width/2}" y="{height - 20}" text-anchor="middle" 
                   font-size="12" fill="#64748b">{item['label']}</text>'''
         
@@ -56,7 +56,7 @@ class VisualElementGenerator:
         """Generate an SVG pie chart"""
         if not data:
             data = [
-                {"label": "Product A", "value": 35, "color": "#3182ce"},
+                {"label": "Product A", "value": 35, "color": "#8B1538"},
                 {"label": "Product B", "value": 25, "color": "#10b981"},
                 {"label": "Product C", "value": 20, "color": "#f59e0b"},
                 {"label": "Product D", "value": 20, "color": "#8b5cf6"}
@@ -84,7 +84,7 @@ class VisualElementGenerator:
             svg += f'''
             <path d="M {center} {center} L {start_x} {start_y} 
                      A {radius} {radius} 0 {large_arc} 1 {end_x} {end_y} Z"
-                  fill="{item.get('color', '#3182ce')}" stroke="white" stroke-width="2" />'''
+                  fill="{item.get('color', '#8B1538')}" stroke="white" stroke-width="2" />'''
             
             # Label
             label_angle = current_angle + angle / 2
@@ -130,8 +130,8 @@ class VisualElementGenerator:
         svg = f'''<svg viewBox="0 0 {width} {height}" xmlns="http://www.w3.org/2000/svg">
             <defs>
                 <linearGradient id="lineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" style="stop-color:#3182ce;stop-opacity:0.8" />
-                    <stop offset="100%" style="stop-color:#3182ce;stop-opacity:0.1" />
+                    <stop offset="0%" style="stop-color:#8B1538;stop-opacity:0.8" />
+                    <stop offset="100%" style="stop-color:#8B1538;stop-opacity:0.1" />
                 </linearGradient>
             </defs>
             
@@ -148,12 +148,12 @@ class VisualElementGenerator:
         svg += f'''<path d="{area_path}" fill="url(#lineGradient)" />'''
         
         # Line
-        svg += f'''<path d="{path}" fill="none" stroke="#3182ce" stroke-width="3" />'''
+        svg += f'''<path d="{path}" fill="none" stroke="#8B1538" stroke-width="3" />'''
         
         # Points
         for i, (x, y) in enumerate(points):
             svg += f'''
-            <circle cx="{x}" cy="{y}" r="5" fill="#3182ce" stroke="white" stroke-width="2" />
+            <circle cx="{x}" cy="{y}" r="5" fill="#8B1538" stroke="white" stroke-width="2" />
             <text x="{x}" y="{height - 20}" text-anchor="middle" font-size="12" fill="#64748b">{data[i]['x']}</text>'''
         
         svg += '</svg>'
@@ -184,7 +184,7 @@ class VisualElementGenerator:
             
             # Progress
             svg += f'''<rect x="100" y="{y}" width="{progress_width}" height="{bar_height}" 
-                        fill="#3182ce" rx="{bar_height/2}" />'''
+                        fill="#8B1538" rx="{bar_height/2}" />'''
             
             # Label
             svg += f'''<text x="90" y="{y + bar_height/2 + 5}" text-anchor="end" 
@@ -192,7 +192,7 @@ class VisualElementGenerator:
             
             # Percentage
             svg += f'''<text x="{width - 10}" y="{y + bar_height/2 + 5}" text-anchor="end" 
-                        font-size="14" font-weight="600" fill="#1a365d">{item['progress']}%</text>'''
+                        font-size="14" font-weight="600" fill="#8B1538">{item['progress']}%</text>'''
         
         svg += '</svg>'
         return svg
@@ -353,7 +353,7 @@ class VisualElementGenerator:
                 "type": "chart",
                 "subtype": "pie",
                 "data": [
-                    {"label": "Segment A", "value": 35, "color": "#3182ce"},
+                    {"label": "Segment A", "value": 35, "color": "#8B1538"},
                     {"label": "Segment B", "value": 25, "color": "#10b981"},
                     {"label": "Segment C", "value": 25, "color": "#f59e0b"},
                     {"label": "Other", "value": 15, "color": "#8b5cf6"}
@@ -421,7 +421,7 @@ VISUAL_ELEMENTS_CSS = '''
     width: 80px;
     height: 80px;
     margin: 0 auto 1rem;
-    background: linear-gradient(135deg, #3182ce, #1a365d);
+    background: linear-gradient(135deg, #8B1538, #00A9CE);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -438,7 +438,7 @@ VISUAL_ELEMENTS_CSS = '''
 
 .icon-item p {
     font-weight: 600;
-    color: #1a365d;
+    color: #8B1538;
 }
 
 /* Process Flow */
@@ -466,7 +466,7 @@ VISUAL_ELEMENTS_CSS = '''
 }
 
 .process-step:hover {
-    border-color: #3182ce;
+    border-color: #8B1538;
     transform: translateY(-2px);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
@@ -474,7 +474,7 @@ VISUAL_ELEMENTS_CSS = '''
 .step-number {
     width: 40px;
     height: 40px;
-    background: #3182ce;
+    background: #8B1538;
     color: white;
     border-radius: 50%;
     display: flex;
@@ -505,7 +505,7 @@ VISUAL_ELEMENTS_CSS = '''
 }
 
 .comparison-table th {
-    background: #1a365d;
+    background: #8B1538;
     color: white;
     padding: 1rem;
     text-align: left;
@@ -527,7 +527,7 @@ VISUAL_ELEMENTS_CSS = '''
 
 .feature-name {
     font-weight: 600;
-    color: #1a365d;
+    color: #8B1538;
 }
 
 /* KPI Cards */
@@ -550,13 +550,13 @@ VISUAL_ELEMENTS_CSS = '''
 .kpi-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-    border-color: #3182ce;
+    border-color: #8B1538;
 }
 
 .kpi-value {
     font-size: 2.5rem;
     font-weight: 700;
-    color: #1a365d;
+    color: #8B1538;
     margin-bottom: 0.5rem;
 }
 
