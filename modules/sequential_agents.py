@@ -13,6 +13,16 @@ from datetime import datetime
 from dataclasses import dataclass
 from enum import Enum
 
+# Load environment variables
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+    logger = logging.getLogger(__name__)
+    logger.info("🔧 Environment variables loaded from .env file")
+except ImportError:
+    logger = logging.getLogger(__name__)
+    logger.warning("⚠️ python-dotenv not available, using system environment variables")
+
 # Import Gemini API
 try:
     import google.generativeai as genai
@@ -23,7 +33,7 @@ try:
     if api_key:
         genai.configure(api_key=api_key)
         logger = logging.getLogger(__name__)
-        logger.info("🔑 Gemini API configured successfully")
+        logger.info(f"🔑 Gemini API configured successfully (key: {api_key[:10]}...)")
     else:
         GEMINI_AVAILABLE = False
         logger = logging.getLogger(__name__)

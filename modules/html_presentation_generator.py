@@ -11,6 +11,16 @@ import logging
 from typing import Dict, Any, List, Optional
 from datetime import datetime
 
+# Load environment variables
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+    logger = logging.getLogger(__name__)
+    logger.info("🔧 Environment variables loaded from .env file")
+except ImportError:
+    logger = logging.getLogger(__name__)
+    logger.warning("⚠️ python-dotenv not available, using system environment variables")
+
 # Import Gemini API
 try:
     import google.generativeai as genai
@@ -21,10 +31,10 @@ try:
     if api_key:
         genai.configure(api_key=api_key)
         logger = logging.getLogger(__name__)
-        logger.info("🔑 Gemini API configured successfully")
+        logger.info(f"🔑 Gemini API configured successfully (key: {api_key[:10]}...)")
     else:
         logger = logging.getLogger(__name__)
-        logger.warning("⚠️ Gemini API key not found")
+        logger.warning("⚠️ Gemini API key not found - using fallback mode")
         GEMINI_AVAILABLE = False
 except ImportError:
     GEMINI_AVAILABLE = False
@@ -120,14 +130,31 @@ class HTMLPresentationGenerator:
                 """
                 
                 response = self.gemini_model.generate_content(prompt)
+                response_text = response.text.strip()
+                
+                # Clean the response text and try to parse JSON
+                # Remove markdown code blocks if present
+                if response_text.startswith('```json'):
+                    response_text = response_text[7:]
+                if response_text.startswith('```'):
+                    response_text = response_text[3:]
+                if response_text.endswith('```'):
+                    response_text = response_text[:-3]
+                response_text = response_text.strip()
                 
                 # Try to parse JSON response
                 try:
-                    analysis = json.loads(response.text.strip())
+                    analysis = json.loads(response_text)
                     logger.info(f"🤖 Gemini analysis: {analysis['slide_count']} slides recommended")
                     return analysis
                 except json.JSONDecodeError:
-                    logger.warning("⚠️ Failed to parse Gemini JSON, using fallback")
+                    logger.warning("⚠️ Failed to parse Gemini analysis JSON, trying manual parsing...")
+                    # Try to extract key information manually
+                    parsed_analysis = self._parse_analysis_response(response.text)
+                    if parsed_analysis:
+                        logger.info(f"✅ Manual parsing succeeded: {parsed_analysis.get('slide_count', 'unknown')} slides")
+                        return parsed_analysis
+                    logger.warning("⚠️ Manual parsing also failed, using fallback")
                     
             except Exception as e:
                 logger.warning(f"⚠️ Gemini analysis failed: {e}")
@@ -218,8 +245,29 @@ class HTMLPresentationGenerator:
         
         try:
             response = self.gemini_model.generate_content(prompt)
-            return json.loads(response.text.strip())
-        except:
+            response_text = response.text.strip()
+            
+            # Clean the response text and try to parse JSON
+            # Remove markdown code blocks if present
+            if response_text.startswith('```json'):
+                response_text = response_text[7:]
+            if response_text.startswith('```'):
+                response_text = response_text[3:]
+            if response_text.endswith('```'):
+                response_text = response_text[:-3]
+            response_text = response_text.strip()
+            
+            # Try to parse JSON response
+            try:
+                return json.loads(response_text)
+            except json.JSONDecodeError:
+                # Fallback: try to parse manually
+                parsed_content = self._parse_text_response(response.text, "title")
+                if parsed_content:
+                    return parsed_content
+                # If manual parsing also fails, fall through to exception handling
+        except Exception as e:
+            logger.warning(f"⚠️ Gemini title slide generation failed: {e}")
             return {
                 "type": "title",
                 "title": title,
@@ -252,8 +300,29 @@ class HTMLPresentationGenerator:
         
         try:
             response = self.gemini_model.generate_content(prompt)
-            return json.loads(response.text.strip())
-        except:
+            response_text = response.text.strip()
+            
+            # Clean the response text and try to parse JSON
+            # Remove markdown code blocks if present
+            if response_text.startswith('```json'):
+                response_text = response_text[7:]
+            if response_text.startswith('```'):
+                response_text = response_text[3:]
+            if response_text.endswith('```'):
+                response_text = response_text[:-3]
+            response_text = response_text.strip()
+            
+            # Try to parse JSON response
+            try:
+                return json.loads(response_text)
+            except json.JSONDecodeError:
+                # Fallback: try to parse manually
+                parsed_content = self._parse_text_response(response.text, "content")
+                if parsed_content:
+                    return parsed_content
+                # If manual parsing also fails, fall through to exception handling
+        except Exception as e:
+            logger.warning(f"⚠️ Gemini content slide generation failed: {e}")
             return {
                 "type": "content",
                 "title": topic,
@@ -286,8 +355,29 @@ class HTMLPresentationGenerator:
         
         try:
             response = self.gemini_model.generate_content(prompt)
-            return json.loads(response.text.strip())
-        except:
+            response_text = response.text.strip()
+            
+            # Clean the response text and try to parse JSON
+            # Remove markdown code blocks if present
+            if response_text.startswith('```json'):
+                response_text = response_text[7:]
+            if response_text.startswith('```'):
+                response_text = response_text[3:]
+            if response_text.endswith('```'):
+                response_text = response_text[:-3]
+            response_text = response_text.strip()
+            
+            # Try to parse JSON response
+            try:
+                return json.loads(response_text)
+            except json.JSONDecodeError:
+                # Fallback: try to parse manually
+                parsed_content = self._parse_text_response(response.text, "conclusion")
+                if parsed_content:
+                    return parsed_content
+                # If manual parsing also fails, fall through to exception handling
+        except Exception as e:
+            logger.warning(f"⚠️ Gemini conclusion slide generation failed: {e}")
             return {
                 "type": "conclusion",
                 "title": "Key Takeaways",
@@ -340,6 +430,94 @@ class HTMLPresentationGenerator:
         })
         
         return slides
+    
+    def _parse_text_response(self, text: str, slide_type: str) -> Dict[str, Any]:
+        """Parse text response when JSON parsing fails"""
+        try:
+            import re
+            
+            if slide_type == "title":
+                # Look for subtitle and highlights in the text
+                subtitle_match = re.search(r'"subtitle":\s*"([^"]+)"', text)
+                highlights = re.findall(r'"([^"]{10,})"', text)
+                
+                if subtitle_match:
+                    subtitle = subtitle_match.group(1)
+                    # Filter out the subtitle from highlights and get unique ones
+                    filtered_highlights = [h for h in highlights if h != subtitle and len(h) > 10][:3]
+                    return {
+                        "type": "title",
+                        "title": "AI and Emotion: Understanding the Connection",
+                        "subtitle": subtitle,
+                        "highlights": filtered_highlights if filtered_highlights else ["Key insights", "Important findings", "Strategic recommendations"]
+                    }
+            
+            elif slide_type == "content":
+                # Look for bullet points and key message
+                bullets = re.findall(r'"([^"]{15,})"', text)
+                if bullets:
+                    return {
+                        "type": "content",
+                        "title": "Content Analysis",
+                        "bullets": bullets[:5],
+                        "key_takeaway": bullets[0] if bullets else "Key insight from analysis"
+                    }
+            
+            elif slide_type == "conclusion":
+                # Look for takeaways and closing statement
+                takeaways = re.findall(r'"([^"]{20,})"', text)
+                if takeaways:
+                    return {
+                        "type": "conclusion",
+                        "title": "Key Takeaways",
+                        "takeaways": takeaways[:4],
+                        "closing_statement": takeaways[-1] if takeaways else "Thank you for your attention"
+                    }
+        
+        except Exception as e:
+            logger.warning(f"⚠️ Text parsing error for {slide_type}: {e}")
+        
+        # Return empty dict if parsing fails - calling function will handle fallback
+        return {}
+    
+    def _parse_analysis_response(self, text: str) -> Dict[str, Any]:
+        """Parse analysis response when JSON parsing fails"""
+        try:
+            import re
+            
+            # Look for slide count
+            slide_count_match = re.search(r'"slide_count":\s*(\d+)', text)
+            slide_count = int(slide_count_match.group(1)) if slide_count_match else None
+            
+            # Look for title
+            title_match = re.search(r'"title":\s*"([^"]+)"', text)
+            title = title_match.group(1) if title_match else None
+            
+            # Look for sections
+            sections = re.findall(r'"([^"]{10,})"', text)
+            # Filter out title and other non-section items
+            filtered_sections = [s for s in sections if s != title and len(s.split()) > 1][:5]
+            
+            # Look for theme and color scheme
+            theme_match = re.search(r'"theme":\s*"([^"]+)"', text)
+            theme = theme_match.group(1) if theme_match else "professional"
+            
+            color_match = re.search(r'"color_scheme":\s*"([^"]+)"', text)
+            color_scheme = color_match.group(1) if color_match else "blue"
+            
+            if slide_count or title or filtered_sections:
+                return {
+                    "slide_count": slide_count or 4,
+                    "title": title or "Presentation",
+                    "sections": filtered_sections,
+                    "theme": theme,
+                    "color_scheme": color_scheme
+                }
+        
+        except Exception as e:
+            logger.warning(f"⚠️ Analysis parsing error: {e}")
+        
+        return {}
     
     def _create_html_presentation(self, slides: List[Dict[str, Any]], analysis: Dict[str, Any]) -> str:
         """Create the final HTML presentation"""
