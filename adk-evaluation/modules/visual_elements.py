@@ -438,7 +438,7 @@ VISUAL_ELEMENTS_CSS = '''
 
 .icon-item p {
     font-weight: 600;
-    color: #8B1538;
+    color: #333333;
 }
 
 /* Process Flow */
@@ -527,7 +527,7 @@ VISUAL_ELEMENTS_CSS = '''
 
 .feature-name {
     font-weight: 600;
-    color: #8B1538;
+    color: #333333;
 }
 
 /* KPI Cards */
@@ -556,7 +556,7 @@ VISUAL_ELEMENTS_CSS = '''
 .kpi-value {
     font-size: 2.5rem;
     font-weight: 700;
-    color: #8B1538;
+    color: #333333;
     margin-bottom: 0.5rem;
 }
 

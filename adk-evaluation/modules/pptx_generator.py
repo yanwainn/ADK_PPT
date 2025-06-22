@@ -32,145 +32,184 @@ class PowerPointGenerator:
         self.prs.slide_width = Inches(13.333)
         self.prs.slide_height = Inches(7.5)
         
-        # Professional color palette
+        # Bosch color palette
         self.colors = {
-            'primary': RGBColor(26, 43, 109),      # Dark blue
-            'secondary': RGBColor(59, 130, 246),   # Bright blue
-            'accent': RGBColor(239, 68, 68),       # Red accent
-            'success': RGBColor(16, 185, 129),     # Green
-            'text_dark': RGBColor(31, 41, 55),     # Dark gray
+            'primary': RGBColor(139, 21, 56),      # Bosch red/magenta
+            'secondary': RGBColor(0, 169, 206),    # Bosch teal
+            'accent': RGBColor(127, 181, 57),      # Bosch green
+            'success': RGBColor(127, 181, 57),     # Green
+            'text_dark': RGBColor(51, 51, 51),     # Dark gray
             'text_light': RGBColor(255, 255, 255), # White
-            'background': RGBColor(248, 250, 252)  # Light gray
+            'background': RGBColor(255, 255, 255), # White
+            'footer_red': RGBColor(237, 28, 36)    # Bosch bright red for footer strip
         }
     
     def add_title_slide(self, title: str, subtitle: str, author: str = ""):
-        """Add a professional title slide"""
+        """Add a Bosch-themed title slide"""
         slide_layout = self.prs.slide_layouts[6]  # Blank layout
         slide = self.prs.slides.add_slide(slide_layout)
         
-        # Add gradient background shape
+        # White background
         left = top = 0
         width = self.prs.slide_width
         height = self.prs.slide_height
         
-        shape = slide.shapes.add_shape(
-            MSO_SHAPE.RECTANGLE, left, top, width, height
-        )
-        shape.fill.solid()
-        shape.fill.fore_color.rgb = self.colors['primary']
-        shape.line.fill.background()
-        
         # Add title
         title_box = slide.shapes.add_textbox(
-            Inches(1), Inches(2.5), Inches(11.333), Inches(2)
+            Inches(1), Inches(2), Inches(11.333), Inches(2.5)
         )
         title_frame = title_box.text_frame
         title_frame.text = title
-        title_frame.paragraphs[0].font.size = Pt(44)
+        title_frame.paragraphs[0].font.size = Pt(40)
         title_frame.paragraphs[0].font.bold = True
-        title_frame.paragraphs[0].font.color.rgb = self.colors['text_light']
-        title_frame.paragraphs[0].alignment = PP_ALIGN.CENTER
+        title_frame.paragraphs[0].font.color.rgb = self.colors['text_dark']
+        title_frame.paragraphs[0].alignment = PP_ALIGN.LEFT
         
         # Add subtitle
-        subtitle_box = slide.shapes.add_textbox(
-            Inches(1), Inches(4.5), Inches(11.333), Inches(1)
-        )
-        subtitle_frame = subtitle_box.text_frame
-        subtitle_frame.text = subtitle
-        subtitle_frame.paragraphs[0].font.size = Pt(24)
-        subtitle_frame.paragraphs[0].font.color.rgb = self.colors['text_light']
-        subtitle_frame.paragraphs[0].alignment = PP_ALIGN.CENTER
+        if subtitle:
+            subtitle_box = slide.shapes.add_textbox(
+                Inches(1), Inches(4.5), Inches(11.333), Inches(1)
+            )
+            subtitle_frame = subtitle_box.text_frame
+            subtitle_frame.text = subtitle
+            subtitle_frame.paragraphs[0].font.size = Pt(22)
+            subtitle_frame.paragraphs[0].font.color.rgb = self.colors['secondary']  # Blue for subtitle
+            subtitle_frame.paragraphs[0].alignment = PP_ALIGN.LEFT
         
-        # Add date and author
-        footer_text = f"{author} | {datetime.now().strftime('%B %Y')}"
-        footer_box = slide.shapes.add_textbox(
-            Inches(1), Inches(6.5), Inches(11.333), Inches(0.5)
+        # Add Bosch logo text (bottom right)
+        logo_box = slide.shapes.add_textbox(
+            Inches(10.5), Inches(6.3), Inches(2.5), Inches(0.7)
         )
-        footer_frame = footer_box.text_frame
-        footer_frame.text = footer_text
-        footer_frame.paragraphs[0].font.size = Pt(14)
-        footer_frame.paragraphs[0].font.color.rgb = self.colors['text_light']
-        footer_frame.paragraphs[0].alignment = PP_ALIGN.CENTER
+        logo_frame = logo_box.text_frame
+        logo_frame.text = "BOSCH"
+        logo_frame.paragraphs[0].font.size = Pt(24)
+        logo_frame.paragraphs[0].font.bold = True
+        logo_frame.paragraphs[0].font.color.rgb = self.colors['primary']
+        logo_frame.paragraphs[0].alignment = PP_ALIGN.RIGHT
+        
+        # Add colored strip at bottom
+        strip_height = Inches(0.15)
+        colors = [self.colors['footer_red'], self.colors['secondary'], self.colors['accent']]
+        strip_width = width / len(colors)
+        
+        for i, color in enumerate(colors):
+            strip = slide.shapes.add_shape(
+                MSO_SHAPE.RECTANGLE,
+                strip_width * i, height - strip_height,
+                strip_width, strip_height
+            )
+            strip.fill.solid()
+            strip.fill.fore_color.rgb = color
+            strip.line.fill.background()
     
     def add_content_slide(self, title: str, bullets: List[str], chart_data: Dict = None):
         """Add a content slide with bullets and optional chart"""
         slide_layout = self.prs.slide_layouts[5]  # Blank layout
         slide = self.prs.slides.add_slide(slide_layout)
         
-        # Add title background
-        title_bg = slide.shapes.add_shape(
-            MSO_SHAPE.RECTANGLE, 0, 0, self.prs.slide_width, Inches(1.2)
-        )
-        title_bg.fill.solid()
-        title_bg.fill.fore_color.rgb = self.colors['primary']
-        title_bg.line.fill.background()
-        
-        # Add title
+        # Add title (no background, Bosch style)
         title_box = slide.shapes.add_textbox(
-            Inches(0.5), Inches(0.3), Inches(12.333), Inches(0.8)
+            Inches(0.5), Inches(0.5), Inches(11), Inches(0.8)
         )
         title_frame = title_box.text_frame
         title_frame.text = title
-        title_frame.paragraphs[0].font.size = Pt(32)
+        title_frame.paragraphs[0].font.size = Pt(28)
         title_frame.paragraphs[0].font.bold = True
-        title_frame.paragraphs[0].font.color.rgb = self.colors['text_light']
+        title_frame.paragraphs[0].font.color.rgb = self.colors['text_dark']
+        
+        # Add Bosch logo text (top right)
+        logo_box = slide.shapes.add_textbox(
+            Inches(11), Inches(0.3), Inches(2), Inches(0.5)
+        )
+        logo_frame = logo_box.text_frame
+        logo_frame.text = "BOSCH"
+        logo_frame.paragraphs[0].font.size = Pt(16)
+        logo_frame.paragraphs[0].font.bold = True
+        logo_frame.paragraphs[0].font.color.rgb = self.colors['primary']
+        logo_frame.paragraphs[0].alignment = PP_ALIGN.RIGHT
+        
+        # Add thin line under title
+        line = slide.shapes.add_shape(
+            MSO_SHAPE.RECTANGLE, Inches(0.5), Inches(1.3),
+            Inches(12.333), Pt(2)
+        )
+        line.fill.solid()
+        line.fill.fore_color.rgb = RGBColor(230, 230, 230)
+        line.line.fill.background()
         
         if chart_data:
             # Split layout: bullets on left, chart on right
-            # Add bullets
+            # Add bullets with Bosch styling
             bullet_box = slide.shapes.add_textbox(
                 Inches(0.5), Inches(1.8), Inches(6), Inches(5)
             )
             text_frame = bullet_box.text_frame
             text_frame.text = bullets[0] if bullets else ""
-            text_frame.paragraphs[0].font.size = Pt(18)
+            text_frame.paragraphs[0].font.size = Pt(16)
+            text_frame.paragraphs[0].font.color.rgb = self.colors['text_dark']
             
             for bullet in bullets[1:]:
                 p = text_frame.add_paragraph()
                 p.text = bullet
-                p.font.size = Pt(18)
+                p.font.size = Pt(16)
+                p.font.color.rgb = self.colors['text_dark']
                 p.level = 0
             
             # Add chart
             self._add_chart(slide, chart_data, Inches(7), Inches(1.8), Inches(5.8), Inches(4.5))
         else:
-            # Full width bullets
+            # Full width bullets with Bosch styling
             bullet_box = slide.shapes.add_textbox(
                 Inches(0.5), Inches(1.8), Inches(12.333), Inches(5)
             )
             text_frame = bullet_box.text_frame
             text_frame.text = bullets[0] if bullets else ""
-            text_frame.paragraphs[0].font.size = Pt(20)
+            text_frame.paragraphs[0].font.size = Pt(18)
+            text_frame.paragraphs[0].font.color.rgb = self.colors['text_dark']
             text_frame.paragraphs[0].space_before = Pt(12)
             
             for bullet in bullets[1:]:
                 p = text_frame.add_paragraph()
                 p.text = bullet
-                p.font.size = Pt(20)
+                p.font.size = Pt(18)
+                p.font.color.rgb = self.colors['text_dark']
                 p.level = 0
                 p.space_before = Pt(12)
     
     def add_visual_slide(self, title: str, visual_type: str, data: Dict[str, Any]):
-        """Add a slide focused on visual content"""
+        """Add a slide focused on visual content with Bosch styling"""
         slide_layout = self.prs.slide_layouts[5]  # Blank layout
         slide = self.prs.slides.add_slide(slide_layout)
         
-        # Add title
-        title_bg = slide.shapes.add_shape(
-            MSO_SHAPE.RECTANGLE, 0, 0, self.prs.slide_width, Inches(1.2)
-        )
-        title_bg.fill.solid()
-        title_bg.fill.fore_color.rgb = self.colors['primary']
-        title_bg.line.fill.background()
-        
+        # Add title (Bosch style)
         title_box = slide.shapes.add_textbox(
-            Inches(0.5), Inches(0.3), Inches(12.333), Inches(0.8)
+            Inches(0.5), Inches(0.5), Inches(11), Inches(0.8)
         )
         title_frame = title_box.text_frame
         title_frame.text = title
-        title_frame.paragraphs[0].font.size = Pt(32)
+        title_frame.paragraphs[0].font.size = Pt(28)
         title_frame.paragraphs[0].font.bold = True
-        title_frame.paragraphs[0].font.color.rgb = self.colors['text_light']
+        title_frame.paragraphs[0].font.color.rgb = self.colors['text_dark']
+        
+        # Add Bosch logo text (top right)
+        logo_box = slide.shapes.add_textbox(
+            Inches(11), Inches(0.3), Inches(2), Inches(0.5)
+        )
+        logo_frame = logo_box.text_frame
+        logo_frame.text = "BOSCH"
+        logo_frame.paragraphs[0].font.size = Pt(16)
+        logo_frame.paragraphs[0].font.bold = True
+        logo_frame.paragraphs[0].font.color.rgb = self.colors['primary']
+        logo_frame.paragraphs[0].alignment = PP_ALIGN.RIGHT
+        
+        # Add thin line under title
+        line = slide.shapes.add_shape(
+            MSO_SHAPE.RECTANGLE, Inches(0.5), Inches(1.3),
+            Inches(12.333), Pt(2)
+        )
+        line.fill.solid()
+        line.fill.fore_color.rgb = RGBColor(230, 230, 230)
+        line.line.fill.background()
         
         # Add visual based on type
         if visual_type == "chart":
@@ -218,7 +257,8 @@ class PowerPointGenerator:
         if hasattr(chart, 'has_legend'):
             chart.has_legend = True
             if chart.has_legend and hasattr(chart.legend, 'position'):
-                chart.legend.position = -1  # Bottom
+                from pptx.enum.chart import XL_LEGEND_POSITION
+                chart.legend.position = XL_LEGEND_POSITION.BOTTOM
     
     def _add_comparison_table(self, slide, data: Dict, left, top):
         """Add a comparison table"""
@@ -281,7 +321,7 @@ class PowerPointGenerator:
                 step_width, step_height
             )
             shape.fill.solid()
-            shape.fill.fore_color.rgb = self.colors['secondary']
+            shape.fill.fore_color.rgb = self.colors['accent']
             
             # Add text
             shape.text = step
@@ -322,16 +362,16 @@ class PowerPointGenerator:
             card_left = left + (i % 4) * (card_width + spacing)
             card_top = top + (i // 4) * (card_height + spacing)
             
-            # Add card background
+            # Add card background with Bosch styling
             card = slide.shapes.add_shape(
                 MSO_SHAPE.ROUNDED_RECTANGLE,
                 card_left, card_top,
                 card_width, card_height
             )
             card.fill.solid()
-            card.fill.fore_color.rgb = RGBColor(255, 255, 255)
-            card.line.color.rgb = RGBColor(229, 231, 235)
-            card.line.width = Pt(1)
+            card.fill.fore_color.rgb = RGBColor(245, 245, 245)
+            card.line.color.rgb = self.colors['secondary']
+            card.line.width = Pt(2)
             
             # Add value
             value_box = slide.shapes.add_textbox(
@@ -342,7 +382,7 @@ class PowerPointGenerator:
             value_frame.text = kpi['value']
             value_frame.paragraphs[0].font.size = Pt(28)
             value_frame.paragraphs[0].font.bold = True
-            value_frame.paragraphs[0].font.color.rgb = self.colors['primary']
+            value_frame.paragraphs[0].font.color.rgb = self.colors['text_dark']  # Black for values
             value_frame.paragraphs[0].alignment = PP_ALIGN.CENTER
             
             # Add label
@@ -370,63 +410,88 @@ class PowerPointGenerator:
             change_frame.paragraphs[0].alignment = PP_ALIGN.CENTER
     
     def add_conclusion_slide(self, title: str, takeaways: List[str], next_steps: List[str]):
-        """Add a conclusion slide"""
+        """Add a conclusion slide with Bosch styling"""
         slide_layout = self.prs.slide_layouts[5]  # Blank layout
         slide = self.prs.slides.add_slide(slide_layout)
         
-        # Add gradient background
-        bg = slide.shapes.add_shape(
-            MSO_SHAPE.RECTANGLE, 0, 0, 
-            self.prs.slide_width, self.prs.slide_height
-        )
-        bg.fill.solid()
-        bg.fill.fore_color.rgb = self.colors['primary']
-        bg.line.fill.background()
-        
         # Add title
         title_box = slide.shapes.add_textbox(
-            Inches(0.5), Inches(0.5), Inches(12.333), Inches(1)
+            Inches(0.5), Inches(0.5), Inches(11), Inches(0.8)
         )
         title_frame = title_box.text_frame
         title_frame.text = title
-        title_frame.paragraphs[0].font.size = Pt(36)
+        title_frame.paragraphs[0].font.size = Pt(28)
         title_frame.paragraphs[0].font.bold = True
-        title_frame.paragraphs[0].font.color.rgb = self.colors['text_light']
-        title_frame.paragraphs[0].alignment = PP_ALIGN.CENTER
+        title_frame.paragraphs[0].font.color.rgb = self.colors['text_dark']
         
-        # Add takeaways section
+        # Add Bosch logo text (top right)
+        logo_box = slide.shapes.add_textbox(
+            Inches(11), Inches(0.3), Inches(2), Inches(0.5)
+        )
+        logo_frame = logo_box.text_frame
+        logo_frame.text = "BOSCH"
+        logo_frame.paragraphs[0].font.size = Pt(16)
+        logo_frame.paragraphs[0].font.bold = True
+        logo_frame.paragraphs[0].font.color.rgb = self.colors['primary']
+        logo_frame.paragraphs[0].alignment = PP_ALIGN.RIGHT
+        
+        # Add thin line under title
+        line = slide.shapes.add_shape(
+            MSO_SHAPE.RECTANGLE, Inches(0.5), Inches(1.3),
+            Inches(12.333), Pt(2)
+        )
+        line.fill.solid()
+        line.fill.fore_color.rgb = RGBColor(230, 230, 230)
+        line.line.fill.background()
+        
+        # Add takeaways section with circular bullet style
         takeaway_box = slide.shapes.add_textbox(
-            Inches(0.5), Inches(2), Inches(5.5), Inches(4)
+            Inches(0.5), Inches(2), Inches(5.5), Inches(4.5)
         )
         takeaway_frame = takeaway_box.text_frame
         takeaway_frame.text = "Key Takeaways"
-        takeaway_frame.paragraphs[0].font.size = Pt(24)
+        takeaway_frame.paragraphs[0].font.size = Pt(22)
         takeaway_frame.paragraphs[0].font.bold = True
-        takeaway_frame.paragraphs[0].font.color.rgb = self.colors['text_light']
+        takeaway_frame.paragraphs[0].font.color.rgb = self.colors['text_dark']  # Black for takeaways
         
         for takeaway in takeaways:
             p = takeaway_frame.add_paragraph()
             p.text = f"• {takeaway}"
-            p.font.size = Pt(18)
-            p.font.color.rgb = self.colors['text_light']
-            p.space_before = Pt(8)
+            p.font.size = Pt(16)
+            p.font.color.rgb = self.colors['text_dark']
+            p.space_before = Pt(10)
         
         # Add next steps section
         steps_box = slide.shapes.add_textbox(
-            Inches(7), Inches(2), Inches(5.5), Inches(4)
+            Inches(7), Inches(2), Inches(5.5), Inches(4.5)
         )
         steps_frame = steps_box.text_frame
         steps_frame.text = "Next Steps"
-        steps_frame.paragraphs[0].font.size = Pt(24)
+        steps_frame.paragraphs[0].font.size = Pt(22)
         steps_frame.paragraphs[0].font.bold = True
-        steps_frame.paragraphs[0].font.color.rgb = self.colors['text_light']
+        steps_frame.paragraphs[0].font.color.rgb = self.colors['secondary']
         
         for i, step in enumerate(next_steps):
             p = steps_frame.add_paragraph()
             p.text = f"{i+1}. {step}"
-            p.font.size = Pt(18)
-            p.font.color.rgb = self.colors['text_light']
-            p.space_before = Pt(8)
+            p.font.size = Pt(16)
+            p.font.color.rgb = self.colors['text_dark']
+            p.space_before = Pt(10)
+        
+        # Add colored strip at bottom
+        strip_height = Inches(0.15)
+        colors = [self.colors['footer_red'], self.colors['secondary'], self.colors['accent']]
+        strip_width = self.prs.slide_width / len(colors)
+        
+        for i, color in enumerate(colors):
+            strip = slide.shapes.add_shape(
+                MSO_SHAPE.RECTANGLE,
+                strip_width * i, self.prs.slide_height - strip_height,
+                strip_width, strip_height
+            )
+            strip.fill.solid()
+            strip.fill.fore_color.rgb = color
+            strip.line.fill.background()
     
     def save(self, filename: str) -> str:
         """Save the presentation and return the path"""

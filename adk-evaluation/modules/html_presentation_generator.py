@@ -740,7 +740,7 @@ class HTMLPresentationGenerator:
             left: 0;
             right: 0;
             height: 5px;
-            background: linear-gradient(to right, #8B1538 33%, #00A9CE 33%, #00A9CE 66%, #7FB539 66%);
+            background: linear-gradient(to right, #ED1C24 33%, #00A9CE 33%, #00A9CE 66%, #7FB539 66%);
         }}
         
         
@@ -836,7 +836,7 @@ class HTMLPresentationGenerator:
         .title-slide .subtitle {{
             font-size: 1.25rem;
             font-weight: 400;
-            color: #8B1538;
+            color: #00A9CE;
             max-width: 800px;
             line-height: 1.6;
         }}
@@ -912,7 +912,7 @@ class HTMLPresentationGenerator:
             font-family: var(--font-primary);
             font-size: clamp(1.75rem, 2.5vw, 2.25rem);
             font-weight: 700;
-            color: var(--color-primary);
+            color: #333333;
             margin-bottom: var(--space-xl);
             line-height: 1.3;
         }}
