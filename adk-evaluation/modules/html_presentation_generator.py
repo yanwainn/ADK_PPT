@@ -1602,11 +1602,9 @@ class HTMLPresentationGenerator:
         
         if slide_type == "title":
             # Professional title slide with corporate branding area
-            return f"""
-        <div class="slide title-slide" data-slide="{slide_num}">
-            <div class="corporate-header">
-                <div class="logo-placeholder">
-                    BOSCH
+            return f"""        <div class="slide title-slide" data-slide="{slide_num}">            <div class="corporate-header">
+                <div class="bosch-logo">
+                    
                 </div>
                 <div class="date-info">{self._get_current_date()}</div>
             </div>
@@ -1644,12 +1642,11 @@ class HTMLPresentationGenerator:
                     </div>
                 </div>''' for i, takeaway in enumerate(slide.get('takeaways', []))])
             
-            return f"""
-        <div class="slide conclusion-slide" data-slide="{slide_num}">
+            return f"""        <div class="slide conclusion-slide" data-slide="{slide_num}">
             <div class="corporate-header">
                 <div class="section-label">EXECUTIVE SUMMARY</div>
-                <div class="logo-placeholder">
-                    BOSCH
+                <div class="bosch-logo">
+                    
                 </div>
             </div>
             
@@ -1700,12 +1697,11 @@ class HTMLPresentationGenerator:
             </li>''' for bullet in slide.get('bullets', [])])
         key_takeaway = slide.get('key_takeaway', '')
         
-        return f"""
-        <div class="slide content-slide standard-layout" data-slide="{slide_num}">
+        return f"""        <div class="slide content-slide standard-layout" data-slide="{slide_num}">
             <div class="corporate-header">
                 <div class="section-label">{self._get_section_label(slide_num)}</div>
-                <div class="logo-placeholder">
-                    BOSCH
+                <div class="bosch-logo">
+                    
                 </div>
             </div>
             
@@ -1775,12 +1771,11 @@ class HTMLPresentationGenerator:
         # Create bullet points HTML
         bullets_html = ''.join([f'<li><span style="color: #3182ce; margin-right: 0.5rem;">📈</span> {bullet}</li>' for bullet in bullets])
         
-        return f"""
-        <div class="slide content-slide data-layout" data-slide="{slide_num}">
+        return f"""        <div class="slide content-slide data-layout" data-slide="{slide_num}">
             <div class="corporate-header">
                 <div class="section-label">{self._get_section_label(slide_num)}</div>
-                <div class="logo-placeholder">
-                    BOSCH
+                <div class="bosch-logo">
+                    
                 </div>
             </div>
             
@@ -1840,12 +1835,11 @@ class HTMLPresentationGenerator:
         
         bullets_html = ''.join([f'<li><span style="color: #3182ce; margin-right: 0.5rem;">▸</span> {bullet}</li>' for bullet in bullets])
         
-        return f"""
-        <div class="slide content-slide visual-split-layout" data-slide="{slide_num}">
+        return f"""        <div class="slide content-slide visual-split-layout" data-slide="{slide_num}">
             <div class="corporate-header">
                 <div class="section-label">{self._get_section_label(slide_num)}</div>
-                <div class="logo-placeholder">
-                    BOSCH
+                <div class="bosch-logo">
+                    
                 </div>
             </div>
             
@@ -1979,12 +1973,11 @@ class HTMLPresentationGenerator:
             }
             comparison_html = VisualElementGenerator.generate_comparison_table(comparison_data)
         
-        return f"""
-        <div class="slide content-slide comparison-layout" data-slide="{slide_num}">
+        return f"""        <div class="slide content-slide comparison-layout" data-slide="{slide_num}">
             <div class="corporate-header">
                 <div class="section-label">{self._get_section_label(slide_num)}</div>
-                <div class="logo-placeholder">
-                    BOSCH
+                <div class="bosch-logo">
+                    
                 </div>
             </div>
             
@@ -2024,12 +2017,11 @@ class HTMLPresentationGenerator:
             steps = bullets[:5] if len(bullets) >= 3 else ["Assess", "Plan", "Execute", "Monitor", "Optimize"]
             process_html = VisualElementGenerator.generate_process_flow(steps)
         
-        return f"""
-        <div class="slide content-slide process-layout" data-slide="{slide_num}">
+        return f"""        <div class="slide content-slide process-layout" data-slide="{slide_num}">
             <div class="corporate-header">
                 <div class="section-label">{self._get_section_label(slide_num)}</div>
-                <div class="logo-placeholder">
-                    BOSCH
+                <div class="bosch-logo">
+                    
                 </div>
             </div>
             
