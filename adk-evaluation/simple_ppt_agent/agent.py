@@ -463,8 +463,15 @@ def generate_enhanced_html(result_data: Dict[str, Any], title: str, document_tex
     metadata = result_data.get("metadata", {})
     themes = metadata.get("themes", result_data.get("themes", ["General"]))
     
-    # Generate color palette based on themes
-    colors = html_generator.generate_color_palette(themes)
+    # Use Bosch color palette
+    colors = {
+        'primary': '#8B1538',      # Bosch red/magenta
+        'secondary': '#00A9CE',    # Bosch teal
+        'accent': '#7FB539',       # Bosch green
+        'text': '#333333',         # Dark gray
+        'background': '#FFFFFF',   # White
+        'light': '#F5F5F5'         # Light gray
+    }
     
     # Generate actual slide content using Gemini with proper spacing
     enhanced_slides = []
@@ -491,8 +498,8 @@ def generate_enhanced_html(result_data: Dict[str, Any], title: str, document_tex
         }}
         
         body {{
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, {colors['background']} 0%, #f8f9fa 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: {colors['background']};
             color: {colors['text']};
             line-height: 1.6;
         }}
@@ -507,12 +514,31 @@ def generate_enhanced_html(result_data: Dict[str, Any], title: str, document_tex
             background: {colors['background']};
             margin: 30px 0;
             padding: 60px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            border-left: 5px solid {colors['primary']};
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
             min-height: 400px;
             position: relative;
             overflow: hidden;
+        }}
+        
+        .slide::after {{
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(to right, {colors['primary']} 33%, {colors['secondary']} 33%, {colors['secondary']} 66%, {colors['accent']} 66%);
+        }}
+        
+        .bosch-logo {{
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 1.4em;
+            font-weight: bold;
+            color: {colors['primary']};
+            letter-spacing: 0.05em;
         }}
         
         .slide::before {{
@@ -528,35 +554,38 @@ def generate_enhanced_html(result_data: Dict[str, Any], title: str, document_tex
         
         .slide-number {{
             position: absolute;
-            top: 20px;
-            right: 30px;
-            background: {colors['primary']};
-            color: white;
-            padding: 8px 15px;
-            border-radius: 20px;
+            bottom: 20px;
+            left: 30px;
+            color: {colors['text']};
             font-size: 0.9em;
-            font-weight: bold;
+            opacity: 0.7;
         }}
         
         .title-slide {{
-            text-align: center;
-            background: linear-gradient(135deg, {colors['primary']} 0%, {colors['secondary']} 100%);
-            color: white;
+            text-align: left;
+            background: {colors['background']};
+            color: {colors['text']};
             border: none;
+            padding: 80px;
+        }}
+        
+        .title-slide::after {{
+            height: 8px;
         }}
         
         .title-slide h1 {{
-            font-size: 3.5em;
-            margin-bottom: 20px;
-            font-weight: 300;
-            letter-spacing: -1px;
+            font-size: 3em;
+            margin-bottom: 30px;
+            font-weight: 400;
+            color: {colors['text']};
+            line-height: 1.2;
         }}
         
         .title-slide .subtitle {{
-            font-size: 1.4em;
+            font-size: 1.3em;
             margin-bottom: 40px;
-            opacity: 0.9;
-            font-weight: 300;
+            color: {colors['primary']};
+            font-weight: 400;
         }}
         
         .title-slide .highlights {{
@@ -568,30 +597,31 @@ def generate_enhanced_html(result_data: Dict[str, Any], title: str, document_tex
         }}
         
         .highlight-item {{
-            background: rgba(255,255,255,0.2);
+            background: {colors['light']};
             padding: 15px 25px;
-            border-radius: 25px;
+            border-radius: 8px;
             font-size: 1.1em;
-            backdrop-filter: blur(10px);
+            color: {colors['text']};
+            border-left: 3px solid {colors['secondary']};
         }}
         
         .content-slide h2 {{
-            color: {colors['primary']};
-            font-size: 2.5em;
+            color: {colors['text']};
+            font-size: 2.2em;
             margin-bottom: 30px;
-            font-weight: 600;
+            font-weight: 500;
             position: relative;
+            padding-bottom: 15px;
         }}
         
         .content-slide h2::after {{
             content: '';
             position: absolute;
-            bottom: -10px;
+            bottom: 0;
             left: 0;
-            width: 80px;
-            height: 4px;
-            background: {colors['accent']};
-            border-radius: 2px;
+            width: 100%;
+            height: 1px;
+            background: {colors['light']};
         }}
         
         .bullet-points {{
@@ -608,35 +638,36 @@ def generate_enhanced_html(result_data: Dict[str, Any], title: str, document_tex
         }}
         
         .bullet-points li::before {{
-            content: '▶';
+            content: '•';
             position: absolute;
             left: 0;
-            color: {colors['accent']};
-            font-size: 1.2em;
-            top: 2px;
+            color: {colors['secondary']};
+            font-size: 1.5em;
+            top: -2px;
         }}
         
         .key-message {{
-            background: linear-gradient(90deg, {colors['secondary']}15, transparent);
-            padding: 25px;
-            border-left: 4px solid {colors['secondary']};
-            margin: 30px 0;
-            border-radius: 0 10px 10px 0;
-            font-style: italic;
-            font-size: 1.2em;
-            color: {colors['primary']};
+            background: {colors['light']};
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+            border-left: 4px solid {colors['accent']};
+            font-size: 1.1em;
+            color: {colors['text']};
         }}
         
         .conclusion-slide {{
-            background: linear-gradient(135deg, {colors['secondary']} 0%, {colors['primary']} 100%);
-            color: white;
+            background: {colors['background']};
+            color: {colors['text']};
             border: none;
         }}
         
         .conclusion-slide h2 {{
-            color: white;
-            text-align: center;
+            color: {colors['text']};
+            text-align: left;
             margin-bottom: 40px;
+            font-size: 2.2em;
+            font-weight: 500;
         }}
         
         .takeaways {{
@@ -647,17 +678,23 @@ def generate_enhanced_html(result_data: Dict[str, Any], title: str, document_tex
         }}
         
         .takeaway-item {{
-            background: rgba(255,255,255,0.15);
+            background: {colors['light']};
             padding: 20px;
-            border-radius: 10px;
-            backdrop-filter: blur(10px);
+            border-radius: 8px;
+            border-left: 3px solid {colors['primary']};
+            color: {colors['text']};
         }}
         
         .next-steps {{
-            background: rgba(255,255,255,0.1);
-            padding: 30px;
-            border-radius: 15px;
+            background: {colors['background']};
+            padding: 30px 0;
             margin-top: 30px;
+        }}
+        
+        .next-steps h3 {{
+            color: {colors['secondary']};
+            font-size: 1.4em;
+            margin-bottom: 20px;
         }}
         
         .closing-statement {{
@@ -671,9 +708,21 @@ def generate_enhanced_html(result_data: Dict[str, Any], title: str, document_tex
         .metadata {{
             background: {colors['background']};
             padding: 30px;
-            border-radius: 10px;
+            border-radius: 8px;
             margin-bottom: 30px;
-            border: 1px solid #e0e0e0;
+            border: 1px solid {colors['light']};
+            position: relative;
+        }}
+        
+        .metadata::after {{
+            content: 'BOSCH';
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: {colors['primary']};
+            opacity: 0.3;
         }}
         
         .metadata h3 {{
@@ -752,7 +801,7 @@ def generate_enhanced_html(result_data: Dict[str, Any], title: str, document_tex
             
             html += f"""
         <div class="slide title-slide">
-            <div class="slide-number">{slide_number}</div>
+            <div class="bosch-logo">BOSCH</div>
             <h1>{slide_title}</h1>
             <div class="subtitle">{subtitle}</div>
             <div class="highlights">
@@ -771,6 +820,7 @@ def generate_enhanced_html(result_data: Dict[str, Any], title: str, document_tex
             
             html += f"""
         <div class="slide conclusion-slide">
+            <div class="bosch-logo">BOSCH</div>
             <div class="slide-number">{slide_number}</div>
             <h2>{slide_title}</h2>
             <div class="takeaways">
@@ -798,6 +848,7 @@ def generate_enhanced_html(result_data: Dict[str, Any], title: str, document_tex
             
             html += f"""
         <div class="slide content-slide">
+            <div class="bosch-logo">BOSCH</div>
             <div class="slide-number">{slide_number}</div>
             <h2>{slide_title}</h2>
             <ul class="bullet-points">
@@ -932,7 +983,7 @@ def create_presentation_from_text(document_text: str, presentation_title: str = 
             os.makedirs(static_dir, exist_ok=True)
             static_path = os.path.join(static_dir, html_filename)
             
-            # Generate enhanced HTML using the proper module
+            # Generate enhanced HTML using the proper module FIRST
             print("🎨 Generating enhanced presentation with AI...")
             
             if not HTML_GENERATOR_AVAILABLE or not HTMLPresentationGenerator:
@@ -944,82 +995,9 @@ def create_presentation_from_text(document_text: str, presentation_title: str = 
                     "details": "HTMLPresentationGenerator module could not be imported"
                 })
             
-            # Generate PowerPoint presentation
-            pptx_path = None
-            pptx_url = None
-            
-            if PPTX_GENERATOR_AVAILABLE and PowerPointGenerator:
-                try:
-                    print("📊 Generating PowerPoint presentation...")
-                    
-                    # Prepare content for PowerPoint
-                    ppt_content = {
-                        'title_slide': {
-                            'title': presentation_title or result.get("metadata", {}).get("document_title", "Presentation"),
-                            'subtitle': 'AI-Generated Professional Presentation',
-                            'author': 'Generated by Agentic PPT'
-                        },
-                        'slides': [],
-                        'conclusion': {}
-                    }
-                    
-                    # Convert slides to PowerPoint format
-                    slides_info = result.get("slide_structure", result.get("slides", []))
-                    for i, slide in enumerate(slides_info):
-                        slide_type = slide.get("type", "content")
-                        
-                        if slide_type == "title":
-                            # Already handled as title_slide
-                            continue
-                        elif slide_type == "conclusion":
-                            ppt_content['conclusion'] = {
-                                'title': slide.get("title", "Key Takeaways"),
-                                'takeaways': slide.get("takeaways", ["Important insights discovered"]),
-                                'next_steps': slide.get("next_steps", ["Implement recommendations"])
-                            }
-                        else:
-                            # Determine if slide needs visual elements
-                            slide_title = slide.get("title", f"Slide {i+1}")
-                            bullets = slide.get("bullets", [])
-                            
-                            # Analyze content for visual type
-                            visual_type = _determine_visual_type(slide_title + " " + " ".join(bullets))
-                            
-                            if visual_type:
-                                ppt_content['slides'].append({
-                                    'type': 'visual',
-                                    'title': slide_title,
-                                    'visual_type': visual_type['type'],
-                                    'data': visual_type['data']
-                                })
-                            else:
-                                ppt_content['slides'].append({
-                                    'type': 'content',
-                                    'title': slide_title,
-                                    'bullets': bullets
-                                })
-                    
-                    # Generate PowerPoint file
-                    pptx_generator = PowerPointGenerator()
-                    pptx_filename = f"presentation_{timestamp}.pptx"
-                    pptx_path = os.path.join(output_dir, pptx_filename)
-                    
-                    pptx_generator.generate_from_content(ppt_content, pptx_path)
-                    
-                    # Also save to static directory
-                    static_pptx_path = os.path.join(static_dir, pptx_filename)
-                    import shutil
-                    shutil.copy2(pptx_path, static_pptx_path)
-                    
-                    pptx_url = f"http://localhost:8002/presentations/{pptx_filename}"
-                    print(f"✅ PowerPoint presentation created: {pptx_url}")
-                    
-                except Exception as e:
-                    print(f"⚠️ PowerPoint generation failed: {str(e)}")
-                    import traceback
-                    traceback.print_exc()
-            
-            # Use the proper HTML generator module with visual elements
+            # Generate HTML presentation first to get rich content
+            presentation_result = None
+            html_content = ""
             try:
                 generator = HTMLPresentationGenerator()
                 presentation_result = generator.generate_html_presentation(document_text)
@@ -1048,17 +1026,173 @@ def create_presentation_from_text(document_text: str, presentation_title: str = 
                     "details": traceback.format_exc()
                 })
             
-            # Save to both locations
+            # Save HTML to both locations
             with open(html_path, 'w', encoding='utf-8') as f:
                 f.write(html_content)
             with open(static_path, 'w', encoding='utf-8') as f:
                 f.write(html_content)
             
+            # Now generate PowerPoint using the rich content from HTML generator
+            pptx_path = None
+            pptx_url = None
+            
+            if PPTX_GENERATOR_AVAILABLE and PowerPointGenerator and presentation_result:
+                try:
+                    print("📊 Generating PowerPoint presentation with rich content...")
+                    
+                    # Get the rich slides content from HTML generator
+                    rich_slides = presentation_result.get("slides", [])
+                    
+                    # Prepare content for PowerPoint
+                    ppt_content = {
+                        'title_slide': {},
+                        'slides': [],
+                        'conclusion': {}
+                    }
+                    
+                    # Process the rich slides from HTML generator
+                    for i, slide in enumerate(rich_slides):
+                        slide_type = slide.get("type", "content")
+                        
+                        if slide_type == "title":
+                            # Extract title slide information
+                            ppt_content['title_slide'] = {
+                                'title': slide.get("title", presentation_title or "Presentation"),
+                                'subtitle': slide.get("subtitle", "AI-Generated Professional Presentation"),
+                                'author': 'Generated by Agentic PPT'
+                            }
+                            continue
+                        elif slide_type == "conclusion":
+                            ppt_content['conclusion'] = {
+                                'title': slide.get("title", "Key Takeaways"),
+                                'takeaways': slide.get("takeaways", ["Important insights discovered"]),
+                                'next_steps': slide.get("next_steps", ["Implement recommendations"])
+                            }
+                        else:
+                            # Use the rich content from HTML generator
+                            slide_title = slide.get("title", f"Slide {i+1}")
+                            bullets = slide.get("bullets", [])
+                            
+                            # Check if the slide has visual suggestions from Gemini
+                            visual_suggestion = slide.get("visual_suggestion", {})
+                            if visual_suggestion and visual_suggestion.get("type"):
+                                # Use Gemini's visual suggestion
+                                visual_type_name = visual_suggestion.get("type")
+                                
+                                # Map visual type and generate appropriate data
+                                if visual_type_name == "chart" or visual_type_name == "bar":
+                                    visual_data = {
+                                        'type': 'chart',
+                                        'data': {
+                                            'type': 'bar',
+                                            'categories': ['Q1', 'Q2', 'Q3', 'Q4'],
+                                            'series': [
+                                                ('Performance', (75, 82, 88, 92)),
+                                                ('Target', (70, 75, 80, 85))
+                                            ]
+                                        }
+                                    }
+                                elif visual_type_name == "pie":
+                                    visual_data = {
+                                        'type': 'chart',
+                                        'data': {
+                                            'type': 'pie',
+                                            'categories': ['Segment A', 'Segment B', 'Segment C', 'Other'],
+                                            'series': [('Distribution', (35, 28, 22, 15))]
+                                        }
+                                    }
+                                elif visual_type_name == "process":
+                                    visual_data = {
+                                        'type': 'process',
+                                        'data': {
+                                            'steps': ['Analyze', 'Plan', 'Execute', 'Monitor', 'Optimize']
+                                        }
+                                    }
+                                elif visual_type_name == "kpi":
+                                    visual_data = {
+                                        'type': 'kpi',
+                                        'data': {
+                                            'kpis': [
+                                                {'value': '95%', 'label': 'Efficiency', 'change': '+10%'},
+                                                {'value': '$2.5M', 'label': 'Revenue', 'change': '+23%'},
+                                                {'value': '4.8/5', 'label': 'Rating', 'change': '+0.3'},
+                                                {'value': '1,234', 'label': 'Users', 'change': '+456'}
+                                            ]
+                                        }
+                                    }
+                                elif visual_type_name == "comparison":
+                                    visual_data = {
+                                        'type': 'comparison',
+                                        'data': {
+                                            'columns': ['Aspect', 'Current', 'Proposed'],
+                                            'rows': [
+                                                ['Efficiency', '75%', '95%'],
+                                                ['Cost', '$150K', '$100K'],
+                                                ['Time', '6 months', '3 months'],
+                                                ['Quality', 'Good', 'Excellent']
+                                            ]
+                                        }
+                                    }
+                                else:
+                                    # Fallback to content slide
+                                    visual_data = None
+                                
+                                if visual_data:
+                                    ppt_content['slides'].append({
+                                        'type': 'visual',
+                                        'title': slide_title,
+                                        'visual_type': visual_data['type'],
+                                        'data': visual_data['data']
+                                    })
+                                else:
+                                    ppt_content['slides'].append({
+                                        'type': 'content',
+                                        'title': slide_title,
+                                        'bullets': bullets
+                                    })
+                            else:
+                                # Regular content slide
+                                ppt_content['slides'].append({
+                                    'type': 'content',
+                                    'title': slide_title,
+                                    'bullets': bullets
+                                })
+                    
+                    # Ensure we have a title slide
+                    if not ppt_content['title_slide']:
+                        ppt_content['title_slide'] = {
+                            'title': presentation_title or "Presentation",
+                            'subtitle': "AI-Generated Professional Presentation",
+                            'author': 'Generated by Agentic PPT'
+                        }
+                    
+                    # Generate PowerPoint file
+                    pptx_generator = PowerPointGenerator()
+                    pptx_filename = f"presentation_{timestamp}.pptx"
+                    pptx_path = os.path.join(output_dir, pptx_filename)
+                    
+                    pptx_generator.generate_from_content(ppt_content, pptx_path)
+                    
+                    # Also save to static directory
+                    static_pptx_path = os.path.join(static_dir, pptx_filename)
+                    import shutil
+                    shutil.copy2(pptx_path, static_pptx_path)
+                    
+                    pptx_url = f"http://localhost:8002/presentations/{pptx_filename}"
+                    print(f"✅ PowerPoint presentation created: {pptx_url}")
+                    
+                except Exception as e:
+                    print(f"⚠️ PowerPoint generation failed: {str(e)}")
+                    import traceback
+                    traceback.print_exc()
+            
+            # HTML has already been generated and saved above
+            
             # Create download URL
             download_url = f"http://localhost:8002/presentations/{html_filename}"
             
-            # Get slide information
-            slides_info = result.get("slide_structure", result.get("slides", []))
+            # Get slide information from the rich presentation result
+            slides_info = presentation_result.get("slides", []) if presentation_result else []
             slide_titles = [slide.get("title", "Untitled") for slide in slides_info]
             
             # Get generation statistics from presentation result
