@@ -799,9 +799,8 @@ def generate_enhanced_html(result_data: Dict[str, Any], title: str, document_tex
             subtitle = enhanced_content.get("subtitle", "Professional Analysis")
             highlights = enhanced_content.get("highlights", [])
             
-            html += f"""
-        <div class="slide title-slide">
-            <div class="bosch-logo">BOSCH</div>
+            html += f"""        <div class="slide title-slide">
+            <div class="bosch-logo"></div>
             <h1>{slide_title}</h1>
             <div class="subtitle">{subtitle}</div>
             <div class="highlights">
@@ -818,9 +817,8 @@ def generate_enhanced_html(result_data: Dict[str, Any], title: str, document_tex
             next_steps = enhanced_content.get("next_steps", [])
             closing = enhanced_content.get("closing_statement", "Thank you")
             
-            html += f"""
-        <div class="slide conclusion-slide">
-            <div class="bosch-logo">BOSCH</div>
+            html += f"""        <div class="slide conclusion-slide">
+            <div class="bosch-logo"></div>
             <div class="slide-number">{slide_number}</div>
             <h2>{slide_title}</h2>
             <div class="takeaways">
@@ -846,9 +844,8 @@ def generate_enhanced_html(result_data: Dict[str, Any], title: str, document_tex
             bullet_points = enhanced_content.get("bullet_points", [])
             key_message = enhanced_content.get("key_message", "")
             
-            html += f"""
-        <div class="slide content-slide">
-            <div class="bosch-logo">BOSCH</div>
+            html += f"""        <div class="slide content-slide">
+            <div class="bosch-logo"></div>
             <div class="slide-number">{slide_number}</div>
             <h2>{slide_title}</h2>
             <ul class="bullet-points">
